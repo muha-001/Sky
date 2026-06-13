@@ -3,18 +3,28 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>محدد الإحداثيات والمناطق المحظورة - دقة فائقة</title>
+<title>نظام الاستخبارات الجغرافية المتكامل - GEOINT Pro</title>
 
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- MarkerCluster CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 
 <style>
-/* ══════════════════════════════════════════════
-   الأنماط الأساسية
-══════════════════════════════════════════════ */
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+/* ════════════════════════════════════════════════════════════════════════
+   الأنماط الأساسية العامة
+════════════════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   height: 100%;
   font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
   direction: rtl;
@@ -23,9 +33,9 @@ html, body {
   overflow: hidden;
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════════════
    الشريط العلوي
-══════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════ */
 #header {
   position: fixed;
   inset: 0 0 auto 0;
@@ -37,10 +47,12 @@ html, body {
   gap: 8px;
   padding: 0 12px;
   z-index: 900;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
-/* شعار التطبيق */
+/* الشعار */
 .logo {
   display: flex;
   align-items: center;
@@ -52,6 +64,7 @@ html, body {
   text-decoration: none;
   flex-shrink: 0;
 }
+
 .logo-badge {
   width: 30px;
   height: 30px;
@@ -68,8 +81,9 @@ html, body {
 .search-wrap {
   position: relative;
   flex: 1;
-  max-width: 440px;
+  max-width: 320px;
 }
+
 #search-input {
   width: 100%;
   height: 34px;
@@ -83,8 +97,16 @@ html, body {
   outline: none;
   transition: border-color .2s, background .2s;
 }
-#search-input::placeholder { color: #484f58; }
-#search-input:focus { border-color: #388bfd; background: #1c2128; }
+
+#search-input::placeholder {
+  color: #484f58;
+}
+
+#search-input:focus {
+  border-color: #388bfd;
+  background: #1c2128;
+}
+
 .search-icon {
   position: absolute;
   left: 10px;
@@ -106,89 +128,121 @@ html, body {
   border: 1px solid #30363d;
   border-radius: 9px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
   z-index: 9100;
   max-height: 230px;
   overflow-y: auto;
 }
+
 .sr-item {
   padding: 9px 13px;
   font-size: 12px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   color: #c9d1d9;
   transition: background .15s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.sr-item:last-child { border-bottom: none; }
-.sr-item:hover { background: rgba(56,139,253,0.15); color: #58a6ff; }
-.sr-item.sr-loading { color: #484f58; }
-.sr-item.sr-error { color: #f85149; }
+
+.sr-item:last-child {
+  border-bottom: none;
+}
+
+.sr-item:hover {
+  background: rgba(56, 139, 253, 0.15);
+  color: #58a6ff;
+}
+
+.sr-item.sr-loading {
+  color: #484f58;
+}
+
+.sr-item.sr-error {
+  color: #f85149;
+}
 
 /* أزرار الشريط العلوي */
 .h-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 0 12px;
+  gap: 4px;
+  padding: 0 9px;
   height: 34px;
   background: #21262d;
   border: 1px solid #30363d;
   border-radius: 7px;
   color: #8b949e;
-  font-size: 12px;
+  font-size: 11.5px;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
   transition: all .18s;
   font-family: inherit;
 }
-.h-btn:hover { background: #30363d; color: #c9d1d9; border-color: #484f58; }
+
+.h-btn:hover {
+  background: #30363d;
+  color: #c9d1d9;
+  border-color: #484f58;
+}
+
 .h-btn.primary {
-  background: rgba(31,111,235,0.15);
+  background: rgba(31, 111, 235, 0.15);
   border-color: #1f6feb;
   color: #58a6ff;
 }
-.h-btn.primary:hover { background: rgba(31,111,235,0.28); }
+
 .h-btn.success {
-  background: rgba(46,160,67,0.2);
+  background: rgba(46, 160, 67, 0.2);
   border-color: #2ea043;
   color: #3fb950;
 }
+
+.h-btn.warning {
+  background: rgba(255, 152, 0, 0.15);
+  border-color: #ff9800;
+  color: #ffb74d;
+}
+
 .h-btn.danger-outline {
   border-color: #6e1f24;
   color: #f85149;
 }
-.h-btn.danger-outline:hover { background: rgba(248,81,73,0.12); }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════════════════
    الخريطة
-══════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════ */
 #map {
   position: fixed;
   inset: 54px 0 0 0;
 }
-/* مؤشر الرسم */
-#map.drawing-cursor { cursor: crosshair !important; }
-#map.drawing-cursor .leaflet-interactive { cursor: crosshair !important; }
 
-/* ══════════════════════════════════════════════
+/* مؤشر الرسم */
+#map.drawing-cursor {
+  cursor: crosshair !important;
+}
+
+#map.drawing-cursor .leaflet-interactive {
+  cursor: crosshair !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    لوحة الإحداثيات
-══════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════ */
 #coord-panel {
   position: fixed;
   bottom: 18px;
   right: 14px;
   width: 238px;
-  background: rgba(22,27,34,0.96);
+  background: rgba(22, 27, 34, 0.96);
   border: 1px solid #21262d;
   border-radius: 10px;
   padding: 13px;
   z-index: 800;
   backdrop-filter: blur(14px);
-  box-shadow: 0 6px 28px rgba(0,0,0,0.55);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55);
 }
 
 .panel-head {
@@ -202,6 +256,7 @@ html, body {
   margin-bottom: 10px;
   font-weight: 700;
 }
+
 .panel-head::before {
   content: '';
   width: 3px;
@@ -225,10 +280,18 @@ html, body {
   justify-content: space-between;
   align-items: baseline;
   padding: 5px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
-.coord-row:last-of-type { border-bottom: none; }
-.c-lbl { font-size: 10.5px; color: #484f58; }
+
+.coord-row:last-of-type {
+  border-bottom: none;
+}
+
+.c-lbl {
+  font-size: 10.5px;
+  color: #484f58;
+}
+
 .c-val {
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 13px;
@@ -241,8 +304,8 @@ html, body {
   margin-top: 10px;
   width: 100%;
   padding: 7px;
-  background: rgba(86,211,100,0.1);
-  border: 1px solid rgba(86,211,100,0.25);
+  background: rgba(86, 211, 100, 0.1);
+  border: 1px solid rgba(86, 211, 100, 0.25);
   border-radius: 6px;
   color: #56d364;
   font-size: 11.5px;
@@ -250,23 +313,26 @@ html, body {
   transition: all .18s;
   font-family: inherit;
 }
-#copy-coord-btn:hover { background: rgba(86,211,100,0.22); }
 
-/* ══════════════════════════════════════════════
+#copy-coord-btn:hover {
+  background: rgba(86, 211, 100, 0.22);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    لوحة المناطق الجانبية
-══════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════ */
 #zones-panel {
   position: fixed;
   top: 64px;
   left: 14px;
   width: 258px;
   max-height: calc(100vh - 80px);
-  background: rgba(22,27,34,0.96);
+  background: rgba(22, 27, 34, 0.96);
   border: 1px solid #21262d;
   border-radius: 10px;
   z-index: 800;
   backdrop-filter: blur(14px);
-  box-shadow: 0 6px 28px rgba(0,0,0,0.55);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -274,19 +340,21 @@ html, body {
 
 .zp-head {
   padding: 10px 13px;
-  background: rgba(230,57,70,0.08);
-  border-bottom: 1px solid rgba(230,57,70,0.18);
+  background: rgba(230, 57, 70, 0.08);
+  border-bottom: 1px solid rgba(230, 57, 70, 0.18);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
 }
+
 .zp-title {
   font-size: 11px;
   font-weight: 700;
   color: #e63946;
   letter-spacing: .5px;
 }
+
 #zone-badge {
   background: #e63946;
   color: #fff;
@@ -313,7 +381,10 @@ html, body {
   border-right-width: 3px;
   transition: background .15s;
 }
-.zone-card:hover { background: #1f2937; }
+
+.zone-card:hover {
+  background: #1f2937;
+}
 
 .zc-head {
   display: flex;
@@ -321,18 +392,20 @@ html, body {
   gap: 6px;
   margin-bottom: 5px;
 }
+
 .z-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
+
 .z-name-input {
   flex: 1;
   min-width: 0;
   background: transparent;
   border: none;
-  border-bottom: 1px dashed rgba(255,255,255,0.12);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
   color: #c9d1d9;
   font-size: 12px;
   font-weight: 700;
@@ -341,7 +414,10 @@ html, body {
   font-family: inherit;
   transition: border-color .15s;
 }
-.z-name-input:focus { border-bottom-color: #388bfd; }
+
+.z-name-input:focus {
+  border-bottom-color: #388bfd;
+}
 
 .z-meta {
   font-size: 10px;
@@ -356,6 +432,7 @@ html, body {
   gap: 4px;
   flex-wrap: wrap;
 }
+
 .z-btn {
   padding: 3px 9px;
   border: none;
@@ -366,77 +443,229 @@ html, body {
   transition: opacity .18s;
   font-family: inherit;
 }
-.z-btn:hover { opacity: .82; }
-.z-btn.info  { background: #1f6feb; color: #fff; }
-.z-btn.edit  { background: #7c3aed; color: #fff; }
-.z-btn.edit.active-edit { background: #2ea043; }
-.z-btn.exp   { background: #2ea043; color: #fff; }
-.z-btn.del   { background: #e63946; color: #fff; }
 
-.empty-hint {
-  text-align: center;
-  color: #30363d;
-  font-size: 11px;
-  padding: 22px 10px;
-  line-height: 1.8;
+.z-btn:hover {
+  opacity: .82;
 }
-.empty-hint strong { color: #388bfd; }
 
-/* ══════════════════════════════════════════════
-   شارة وضع الرسم
-══════════════════════════════════════════════ */
-#draw-banner {
+.z-btn.info {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.z-btn.edit {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.z-btn.edit.active-edit {
+  background: #2ea043;
+}
+
+.z-btn.exp {
+  background: #2ea043;
+  color: #fff;
+}
+
+.z-btn.del {
+  background: #e63946;
+  color: #fff;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   شريط الأدوات الجانبي للميزات الاستخباراتية العشر
+════════════════════════════════════════════════════════════════════════ */
+#tools-sidebar {
+  position: fixed;
+  top: 64px;
+  right: 14px;
+  width: 46px;
+  background: rgba(22, 27, 34, 0.96);
+  border: 1px solid #21262d;
+  border-radius: 10px;
+  z-index: 799;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+  align-items: center;
+}
+
+.tool-icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-size: 17px;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: all .15s;
+  position: relative;
+}
+
+.tool-icon:hover {
+  background: #21262d;
+  color: #c9d1d9;
+}
+
+.tool-icon.active {
+  background: rgba(31, 111, 235, 0.25);
+  color: #58a6ff;
+}
+
+.tool-tip {
+  position: absolute;
+  right: 44px;
+  background: #1c2128;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 9999;
+}
+
+.tool-icon:hover .tool-tip {
+  opacity: 1;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   نوافذ الأدوات (مودالات)
+════════════════════════════════════════════════════════════════════════ */
+.tool-modal {
   display: none;
   position: fixed;
-  top: 63px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(230,57,70,0.94);
-  color: #fff;
-  padding: 5px 22px;
-  border-radius: 20px;
-  font-size: 11.5px;
+  top: 70px;
+  right: 70px;
+  width: 340px;
+  max-height: 80vh;
+  background: rgba(22, 27, 34, 0.98);
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  z-index: 9500;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(16px);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tool-modal.open {
+  display: flex;
+}
+
+.tool-modal-header {
+  padding: 10px 14px;
+  background: rgba(31, 111, 235, 0.1);
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
   font-weight: 700;
-  z-index: 860;
-  pointer-events: none;
-  animation: pulse 1.8s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100% { opacity:1; }
-  50% { opacity:.6; }
+  color: #c9d1d9;
 }
 
-/* ══════════════════════════════════════════════
-   معلومات المؤشر
-══════════════════════════════════════════════ */
-#cursor-info {
-  position: fixed;
-  bottom: 18px;
-  left: 284px;
-  background: rgba(22,27,34,0.88);
-  border: 1px solid #21262d;
+.tool-modal-body {
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.tool-modal-close {
+  background: none;
+  border: none;
+  color: #f85149;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.tool-input-group {
+  margin-bottom: 10px;
+}
+
+.tool-input-group label {
+  display: block;
+  font-size: 11px;
+  color: #8b949e;
+  margin-bottom: 4px;
+}
+
+.tool-input-group input,
+.tool-input-group select {
+  width: 100%;
+  padding: 6px 10px;
+  background: #21262d;
+  border: 1px solid #30363d;
   border-radius: 6px;
-  padding: 4px 11px;
-  font-family: 'Consolas', monospace;
-  font-size: 10.5px;
-  color: #484f58;
-  z-index: 798;
-  pointer-events: none;
+  color: #c9d1d9;
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
 }
 
-/* ══════════════════════════════════════════════
-   نافذة تفاصيل المنطقة
-══════════════════════════════════════════════ */
+.tool-input-group input:focus {
+  border-color: #388bfd;
+}
+
+.tool-btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s;
+  font-family: inherit;
+  margin-right: 4px;
+  margin-top: 4px;
+}
+
+.tool-btn.primary {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.tool-btn.success {
+  background: #2ea043;
+  color: #fff;
+}
+
+.tool-btn.warning {
+  background: #ff9800;
+  color: #fff;
+}
+
+.tool-btn.danger {
+  background: #e63946;
+  color: #fff;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   نافذة تفاصيل المنطقة (مودال كبير)
+════════════════════════════════════════════════════════════════════════ */
 #modal-bg {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.78);
+  background: rgba(0, 0, 0, 0.78);
   z-index: 9000;
   align-items: center;
   justify-content: center;
 }
-#modal-bg.open { display: flex; }
+
+#modal-bg.open {
+  display: flex;
+}
 
 #modal-box {
   background: #161b22;
@@ -446,8 +675,9 @@ html, body {
   max-width: 510px;
   max-height: 87vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.75);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
   padding: 20px;
+  direction: rtl;
 }
 
 .m-title {
@@ -459,6 +689,7 @@ html, body {
   align-items: center;
   gap: 9px;
 }
+
 .m-title::before {
   content: '';
   width: 4px;
@@ -476,8 +707,15 @@ html, body {
   border-bottom: 1px solid #21262d;
   font-size: 12px;
 }
-.m-stat:last-of-type { border-bottom: none; }
-.m-lbl { color: #6e7681; }
+
+.m-stat:last-of-type {
+  border-bottom: none;
+}
+
+.m-lbl {
+  color: #6e7681;
+}
+
 .m-val {
   color: #56d364;
   font-family: 'Consolas', monospace;
@@ -502,17 +740,26 @@ html, body {
   max-height: 210px;
   overflow-y: auto;
 }
+
 .vert-row {
   display: flex;
   gap: 10px;
   padding: 2.5px 4px;
-  border-bottom: 1px solid rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
   font-family: 'Consolas', monospace;
   font-size: 11px;
   color: #9ece6a;
 }
-.vert-row:last-child { border-bottom: none; }
-.v-idx { color: #3d444d; min-width: 26px; flex-shrink: 0; }
+
+.vert-row:last-child {
+  border-bottom: none;
+}
+
+.v-idx {
+  color: #3d444d;
+  min-width: 26px;
+  flex-shrink: 0;
+}
 
 .m-actions {
   display: flex;
@@ -520,6 +767,7 @@ html, body {
   margin-top: 14px;
   flex-wrap: wrap;
 }
+
 .m-action-btn {
   flex: 1;
   min-width: 80px;
@@ -532,23 +780,108 @@ html, body {
   transition: opacity .18s, transform .1s;
   font-family: inherit;
 }
-.m-action-btn:hover { opacity: .85; transform: translateY(-1px); }
-.m-action-btn:active { transform: translateY(0); }
-.m-action-btn.geojson { background: #2ea043; color: #fff; }
-.m-action-btn.json    { background: #1f6feb; color: #fff; }
-.m-action-btn.copy    { background: #7c3aed; color: #fff; }
-.m-action-btn.close   { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; }
 
-/* ══════════════════════════════════════════════
+.m-action-btn:hover {
+  opacity: .85;
+  transform: translateY(-1px);
+}
+
+.m-action-btn:active {
+  transform: translateY(0);
+}
+
+.m-action-btn.geojson {
+  background: #2ea043;
+  color: #fff;
+}
+
+.m-action-btn.json {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.m-action-btn.copy {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.m-action-btn.close {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Canvas لخط الرؤية
+════════════════════════════════════════════════════════════════════════ */
+#los-canvas {
+  width: 100%;
+  height: 200px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   شارة الرسم
+════════════════════════════════════════════════════════════════════════ */
+#draw-banner {
+  display: none;
+  position: fixed;
+  top: 63px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(230, 57, 70, 0.94);
+  color: #fff;
+  padding: 5px 22px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  z-index: 860;
+  pointer-events: none;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .6;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   معلومات المؤشر
+════════════════════════════════════════════════════════════════════════ */
+#cursor-info {
+  position: fixed;
+  bottom: 18px;
+  left: 284px;
+  background: rgba(22, 27, 34, 0.88);
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 4px 11px;
+  font-family: 'Consolas', monospace;
+  font-size: 10.5px;
+  color: #484f58;
+  z-index: 798;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    إشعار Toast
-══════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════ */
 #toast {
   display: none;
   position: fixed;
   bottom: 78px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(46,160,67,0.93);
+  background: rgba(46, 160, 67, 0.93);
   color: #fff;
   padding: 8px 22px;
   border-radius: 22px;
@@ -557,107 +890,141 @@ html, body {
   z-index: 9999;
   white-space: nowrap;
   animation: toastIn .25s ease;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   font-family: inherit;
 }
-#toast.err { background: rgba(248,81,73,0.93); }
-@keyframes toastIn {
-  from { transform:translateX(-50%) translateY(10px); opacity:0; }
-  to   { transform:translateX(-50%) translateY(0);    opacity:1; }
+
+#toast.err {
+  background: rgba(248, 81, 73, 0.93);
 }
 
-/* ══════════════════════════════════════════════
+@keyframes toastIn {
+  from {
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    تخصيص Leaflet
-══════════════════════════════════════════════ */
-.leaflet-control-zoom { border: none !important; box-shadow: none !important; }
+════════════════════════════════════════════════════════════════════════ */
+.leaflet-control-zoom {
+  border: none !important;
+}
+
 .leaflet-control-zoom a {
-  background: rgba(22,27,34,0.95) !important;
+  background: rgba(22, 27, 34, 0.95) !important;
   color: #8b949e !important;
   border: 1px solid #30363d !important;
   border-radius: 6px !important;
   margin-bottom: 4px !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px !important;
-  line-height: 30px !important;
-  transition: all .15s !important;
 }
-.leaflet-control-zoom a:hover { color: #58a6ff !important; border-color: #388bfd !important; }
 
 .leaflet-popup-content-wrapper {
   background: #1c2128;
   border: 1px solid #30363d;
   border-radius: 8px;
   color: #c9d1d9;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
 }
-.leaflet-popup-tip { background: #1c2128; }
-.leaflet-popup-content { direction: rtl; font-size: 12px; }
 
-/* Scrollbars */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #21262d; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #30363d; }
+.leaflet-popup-tip {
+  background: #1c2128;
+}
 
-/* ══════════════════════════════════════════════
+.leaflet-popup-content {
+  direction: rtl;
+  font-size: 12px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   أشرطة التمرير
+════════════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #21262d;
+  border-radius: 3px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    استجابة للشاشات الصغيرة
-══════════════════════════════════════════════ */
+════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 660px) {
-  #zones-panel { width: calc(100vw - 28px); max-height: 200px; }
-  #coord-panel { width: calc(100vw - 28px); right: 14px; left: 14px; bottom: 10px; }
-  #cursor-info { display: none; }
-  .logo span:last-child { display: none; }
-  .h-btn .btn-txt { display: none; }
-  #zones-panel { left: 14px; top: 64px; }
+  #zones-panel {
+    width: calc(100vw - 28px);
+    max-height: 200px;
+  }
+
+  #coord-panel {
+    width: calc(100vw - 28px);
+    right: 14px;
+    left: 14px;
+    bottom: 10px;
+  }
+
+  #cursor-info {
+    display: none;
+  }
+
+  #tools-sidebar {
+    right: 5px;
+    top: 60px;
+    width: 40px;
+  }
+
+  .tool-modal {
+    right: 50px;
+    width: 260px;
+  }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ════════════════════════════════════════════════════════════════════════
      الشريط العلوي
-═══════════════════════════════════════════════════ -->
+════════════════════════════════════════════════════════════════════════ -->
 <div id="header">
   <div class="logo">
     <div class="logo-badge">📍</div>
-    <span>محدد الإحداثيات</span>
+    <span>GEOINT Pro</span>
   </div>
 
   <div class="search-wrap">
-    <input id="search-input" type="text"
-           placeholder="ابحث عن مدينة أو عنوان أو معلم..."
-           autocomplete="off" spellcheck="false" />
+    <input id="search-input" type="text" placeholder="ابحث عن مدينة أو عنوان..." autocomplete="off" spellcheck="false" />
     <span class="search-icon">🔍</span>
     <div id="search-results"></div>
   </div>
 
-  <button class="h-btn primary" id="btn-draw">
-    <span>✏️</span><span class="btn-txt">رسم منطقة</span>
-  </button>
-  <button class="h-btn success" id="btn-finish" style="display:none">
-    <span>✅</span><span class="btn-txt">إنهاء الرسم</span>
-  </button>
-  <button class="h-btn danger-outline" id="btn-cancel" style="display:none">
-    <span>✖</span><span class="btn-txt">إلغاء</span>
-  </button>
-  <button class="h-btn" id="btn-clear">
-    <span>🗑</span><span class="btn-txt">مسح العلامة</span>
-  </button>
+  <button class="h-btn primary" id="btn-draw">✏️ رسم</button>
+  <button class="h-btn success" id="btn-finish" style="display:none">✅ إنهاء</button>
+  <button class="h-btn danger-outline" id="btn-cancel" style="display:none">✖ إلغاء</button>
+  <button class="h-btn" id="btn-clear">🗑 مسح العلامة</button>
+  <button class="h-btn" id="btn-cluster-toggle">📊 تجميع</button>
+  <button class="h-btn" id="btn-heatmap-toggle">🌡️ حرارية</button>
+  <button class="h-btn warning" id="btn-load-quakes">🌍 زلازل</button>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ════════════════════════════════════════════════════════════════════════
      الخريطة
-═══════════════════════════════════════════════════ -->
+════════════════════════════════════════════════════════════════════════ -->
 <div id="map"></div>
 
 <!-- شارة وضع الرسم -->
 <div id="draw-banner">⚡ وضع الرسم — انقر لإضافة نقاط | النقر على أول نقطة يغلق المضلع</div>
 
-<!-- ═══════════════════════════════════════════════════
-     لوحة الإحداثيات
-═══════════════════════════════════════════════════ -->
+<!-- لوحة الإحداثيات -->
 <div id="coord-panel">
   <div class="panel-head">الإحداثيات</div>
   <div id="place-name"></div>
@@ -675,29 +1042,209 @@ html, body {
 <!-- معلومات موضع المؤشر -->
 <div id="cursor-info">حرّك المؤشر فوق الخريطة</div>
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ════════════════════════════════════════════════════════════════════════
      لوحة المناطق الجانبية
-═══════════════════════════════════════════════════ -->
+════════════════════════════════════════════════════════════════════════ -->
 <div id="zones-panel">
   <div class="zp-head">
     <span class="zp-title">🚫 المناطق المحظورة</span>
     <span id="zone-badge">0</span>
   </div>
   <div id="zones-list">
-    <div class="empty-hint">
-      لا توجد مناطق بعد<br>
-      استخدم زر <strong>"رسم منطقة"</strong> للبدء
+    <div class="empty-hint">لا توجد مناطق بعد<br>استخدم زر <strong>"رسم"</strong> للبدء</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     شريط الأدوات الجانبي للميزات الاستخباراتية العشر
+════════════════════════════════════════════════════════════════════════ -->
+<div id="tools-sidebar">
+  <!-- 1. مناطق النفوذ -->
+  <button class="tool-icon" id="tool-buffer" title="مناطق النفوذ">
+    <span>◎</span>
+    <span class="tool-tip">مناطق النفوذ (Buffer)</span>
+  </button>
+  <!-- 2. خط الرؤية -->
+  <button class="tool-icon" id="tool-los" title="خط الرؤية">
+    <span>👁️</span>
+    <span class="tool-tip">خط الرؤية (LOS)</span>
+  </button>
+  <!-- 3. تحليل التغطية -->
+  <button class="tool-icon" id="tool-viewshed" title="تحليل التغطية">
+    <span>📡</span>
+    <span class="tool-tip">تحليل التغطية</span>
+  </button>
+  <!-- 4. استيراد KML/GeoJSON -->
+  <button class="tool-icon" id="tool-import" title="استيراد">
+    <span>📥</span>
+    <span class="tool-tip">استيراد KML/GeoJSON</span>
+  </button>
+  <!-- 5. المسار الزمني -->
+  <button class="tool-icon" id="tool-timeline" title="المسار الزمني">
+    <span>⏳</span>
+    <span class="tool-tip">المسار الزمني</span>
+  </button>
+  <!-- 6. التجميع والحرارية (أزرار منفصلة في الشريط العلوي) -->
+  <!-- 7. محول الإحداثيات MGRS / DMS -->
+  <button class="tool-icon" id="tool-mgrs" title="محول الإحداثيات">
+    <span>🧭</span>
+    <span class="tool-tip">محول MGRS / DMS</span>
+  </button>
+  <!-- 8. مناطق زمن الوصول -->
+  <button class="tool-icon" id="tool-isochrone" title="مناطق زمن الوصول">
+    <span>⏱️</span>
+    <span class="tool-tip">زمن الوصول (Isochrones)</span>
+  </button>
+  <!-- 9. إنذار المناطق -->
+  <button class="tool-icon" id="tool-geofence" title="محاكي الإنذار">
+    <span>🚨</span>
+    <span class="tool-tip">إنذار المناطق (Geofence)</span>
+  </button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     نوافذ الأدوات
+════════════════════════════════════════════════════════════════════════ -->
+
+<!-- 1. نافذة Buffer -->
+<div id="modal-buffer" class="tool-modal">
+  <div class="tool-modal-header">
+    <span>◎ مناطق النفوذ (Buffer & Range Rings)</span>
+    <button class="tool-modal-close">✖</button>
+  </div>
+  <div class="tool-modal-body">
+    <div class="tool-input-group">
+      <label>نصف القطر (متر)</label>
+      <input id="buffer-radius" type="number" value="5000" step="100" />
+    </div>
+    <button class="tool-btn primary" id="buffer-apply">رسم دائرة حول العلامة الحالية</button>
+    <button class="tool-btn warning" id="buffer-clear">مسح جميع الدوائر</button>
+  </div>
+</div>
+
+<!-- 2. نافذة خط الرؤية -->
+<div id="modal-los" class="tool-modal">
+  <div class="tool-modal-header">
+    <span>👁️ خط الرؤية (Line of Sight)</span>
+    <button class="tool-modal-close">✖</button>
+  </div>
+  <div class="tool-modal-body">
+    <p style="font-size:11px; color:#8b949e;">انقر نقطتين على الخريطة بعد فتح النافذة</p>
+    <canvas id="los-canvas"></canvas>
+    <div id="los-result" style="margin-top:8px; font-size:12px;"></div>
+    <button class="tool-btn danger" id="los-clear">مسح نقاط LOS</button>
+  </div>
+</div>
+
+<!-- 3. نافذة Viewshed -->
+<div id="modal-viewshed" class="tool-modal">
+  <div class="tool-modal-header">
+    <span>📡 تحليل التغطية (Viewshed)</span>
+    <button class="tool-modal-close">✖</button>
+  </div>
+  <div class="tool-modal-body">
+    <div class="tool-input-group">
+      <label>زاوية الرؤية (درجة)</label>
+      <input id="viewshed-angle" type="number" value="45" min="10" max="360" />
+    </div>
+    <div class="tool-input-group">
+      <label>مدى الرؤية (كم)</label>
+      <input id="viewshed-range" type="number" value="10" step="0.1" />
+    </div>
+    <button class="tool-btn primary" id="viewshed-apply">رسم قطاع التغطية</button>
+    <button class="tool-btn warning" id="viewshed-clear">مسح</button>
+  </div>
+</div>
+
+<!-- 4. نافذة الاستيراد -->
+<div id="modal-import" class="tool-modal">
+  <div class="tool-modal-header">
+    <span>📥 استيراد KML / GeoJSON</span>
+    <button class="tool-modal-close">✖</button>
+  </div>
+  <div class="tool-modal-body">
+    <input type="file" id="import-file" accept=".kml,.geojson,.json" style="margin-bottom:10px;" />
+    <button class="tool-btn primary" id="import-load">تحميل الملف</button>
+  </div>
+</div>
+
+<!-- 5. نافذة المسار الزمني -->
+<div id="modal-timeline" class="tool-modal">
+  <div class="tool-modal-header">
+    <span>⏳ المسار الزمني (Timeline)</span>
+    <button class="tool-modal-close">✖</button>
+  </div>
+  <div class="tool-modal-body">
+    <p style="font-size:11px; color:#8b949e;">انقر نقاطاً متعددة على الخريطة لإنشاء مسار زمني</p>
+    <button class="tool-btn primary" id="timeline-start">بدء تسجيل النقاط</button>
+    <button class="tool-btn success" id="timeline-stop" disabled>إيقاف التسجيل</button>
+    <button class="tool-btn warning" id="timeline-play">▶ تشغيل الحركة</button>
+    <input type="range" id="timeline-slider" min="0" max="0" value="0" style="width:100%; margin-top:8px;" disabled />
+  </div>
+</div>
+
+<!-- 7. نافذة محول MGRS -->
+<div id="modal-mgrs" class="tool-modal">
+  <div class="tool-modal-header">
+    <span>🧭 محول الإحداثيات (MGRS / DMS)</span>
+    <button class="tool-modal-close">✖</button>
+  </div>
+  <div class="tool-modal-body">
+    <div class="tool-input-group">
+      <label>إحداثيات (خط عرض, خط طول) مثال: 33.3152,44.3661</label>
+      <input id="mgrs-input" placeholder="33.3152, 44.3661" />
+    </div>
+    <button class="tool-btn primary" id="mgrs-convert">تحويل</button>
+    <div style="margin-top:10px; font-size:12px;">
+      <strong>MGRS:</strong> <span id="mgrs-out">--</span><br>
+      <strong>DMS:</strong> <span id="dms-out">--</span>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     نافذة تفاصيل المنطقة
-═══════════════════════════════════════════════════ -->
+<!-- 8. نافذة Isochrones -->
+<div id="modal-isochrone" class="tool-modal">
+  <div class="tool-modal-header">
+    <span>⏱️ مناطق زمن الوصول (Isochrones)</span>
+    <button class="tool-modal-close">✖</button>
+  </div>
+  <div class="tool-modal-body">
+    <div class="tool-input-group">
+      <label>مفتاح OpenRouteService API (مجاني)</label>
+      <input id="ors-key" placeholder="أدخل مفتاح API هنا" />
+    </div>
+    <div class="tool-input-group">
+      <label>الزمن (دقيقة مشياً)</label>
+      <input id="isochrone-time" type="number" value="15" />
+    </div>
+    <button class="tool-btn primary" id="isochrone-apply">حساب منطقة زمن الوصول</button>
+    <button class="tool-btn warning" id="isochrone-clear">مسح</button>
+  </div>
+</div>
+
+<!-- 9. نافذة Geofence -->
+<div id="modal-geofence" class="tool-modal">
+  <div class="tool-modal-header">
+    <span>🚨 محاكي إنذار المناطق (Geofence)</span>
+    <button class="tool-modal-close">✖</button>
+  </div>
+  <div class="tool-modal-body">
+    <p style="font-size:11px; color:#8b949e;">أدخل إحداثيات لفحص ما إذا كانت داخل المناطق المحظورة</p>
+    <div class="tool-input-group">
+      <label>lat, lng</label>
+      <input id="geofence-coord" placeholder="33.3152, 44.3661" />
+    </div>
+    <button class="tool-btn primary" id="geofence-check">فحص</button>
+    <div id="geofence-result" style="margin-top:10px; font-size:12px;"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     نافذة تفاصيل المنطقة (موجودة مسبقاً)
+════════════════════════════════════════════════════════════════════════ -->
 <div id="modal-bg">
   <div id="modal-box">
-    <div class="m-title" id="m-title">تفاصيل المنطقة</div>
-
+    <div class="m-title" id="m-title">📊 تفاصيل المنطقة</div>
     <div class="m-stat">
       <span class="m-lbl">عدد الرؤوس</span>
       <span class="m-val" id="m-verts-count">--</span>
@@ -718,15 +1265,13 @@ html, body {
       <span class="m-lbl">مركز الثقل</span>
       <span class="m-val" id="m-centroid">--</span>
     </div>
-
     <div class="verts-lbl">إحداثيات الرؤوس — دقة 8 منازل عشرية:</div>
     <div id="verts-container"></div>
-
     <div class="m-actions">
       <button class="m-action-btn geojson" id="m-btn-geojson">⬇ GeoJSON</button>
-      <button class="m-action-btn json"    id="m-btn-json">⬇ JSON</button>
-      <button class="m-action-btn copy"    id="m-btn-copy">📋 نسخ الإحداثيات</button>
-      <button class="m-action-btn close"   id="m-btn-close">✖ إغلاق</button>
+      <button class="m-action-btn json" id="m-btn-json">⬇ JSON</button>
+      <button class="m-action-btn copy" id="m-btn-copy">📋 نسخ الإحداثيات</button>
+      <button class="m-action-btn close" id="m-btn-close">✖ إغلاق</button>
     </div>
   </div>
 </div>
@@ -734,45 +1279,76 @@ html, body {
 <!-- إشعار Toast -->
 <div id="toast"></div>
 
-<!-- ═══════════════════════════════════════════════════
+<!-- ════════════════════════════════════════════════════════════════════════
      المكتبات الخارجية عبر CDN
-═══════════════════════════════════════════════════ -->
+════════════════════════════════════════════════════════════════════════ -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://unpkg.com/togeojson@0.16.0/togeojson.min.js"></script>
+<script src="https://unpkg.com/tokml@0.4.0/tokml.js"></script>
+<script src="https://unpkg.com/mgrs@1.0.0/dist/mgrs.min.js"></script>
 
 <script>
-/* ╔══════════════════════════════════════════════════════╗
-   ║  محدد الإحداثيات والمناطق المحظورة — v2.0          ║
-   ║  حسابات كروية حقيقية (Turf.js / WGS-84)            ║
-   ╚══════════════════════════════════════════════════════╝ */
-
+/* ╔══════════════════════════════════════════════════════════════════════════╗
+   ║  GEOINT Pro — جميع الميزات العشرة مدمجة                              ║
+   ║  1. Buffer & Range Rings    2. Line of Sight                          ║
+   ║  3. Viewshed                4. Import KML/GeoJSON                     ║
+   ║  5. Timeline                6. Clustering & Heatmap                   ║
+   ║  7. MGRS / DMS Converter   8. Isochrones                             ║
+   ║  9. Geofence Alerts        10. OSINT Layers (Earthquakes)             ║
+   ╚══════════════════════════════════════════════════════════════════════════╝ */
 'use strict';
 
-/* ─── الثوابت ─── */
+/* ────────────────────────────────────────────
+   المتغيرات الأساسية
+─────────────────────────────────────────── */
+let map;
+let mainMarker = null;
+let drawMode = false;
+let drawPoints = [];
+let drawLine = null;
+let drawDots = [];
+let zones = [];
+let zoneSeq = 0;
+let modalIdx = null;   // فهرس المنطقة في نافذة التفاصيل
+let editIdx = null;    // فهرس المنطقة قيد التعديل
+
 const ZONE_COLORS = [
   '#e63946', '#00d4ff', '#ffc947', '#2ea043', '#ff9800',
   '#9c27b0', '#00e5ff', '#ff5722', '#4fc3f7', '#a3e635'
 ];
-const CLOSE_DIST_M = 22; // بالمتر: المسافة للنقر على أول نقطة لإغلاق المضلع
+const CLOSE_DIST_M = 22; // مسافة إغلاق المضلع (متر)
 
-/* ─── حالة التطبيق ─── */
-let map;
-let mainMarker = null;
-let drawMode   = false;
-let drawPoints = [];
-let drawLine   = null;
-let drawDots   = [];
-let zones      = [];
-let zoneSeq    = 0;
-let modalIdx   = null;   // فهرس المنطقة في النافذة المنبثقة
-let editIdx    = null;   // فهرس المنطقة قيد التعديل
+/* ────────────────────────────────────────────
+   طبقات إضافية للميزات الجديدة
+─────────────────────────────────────────── */
+let bufferLayer = L.featureGroup();      // للدوائر
+let viewshedLayer = L.featureGroup();    // لقطاعات التغطية
+let isochroneLayer = L.featureGroup();   // لمناطق زمن الوصول
+let quakeLayer = L.featureGroup();       // للزلازل
+let importedLayer = L.featureGroup();    // للملفات المستوردة
+let clusterGroup = L.markerClusterGroup({ chunkedLoading: true });
+let heatmapLayer = null;
 
-/* ════════════════════════════════════════════
+// متغيرات المسار الزمني
+let timelinePoints = [];
+let timelineMarker = null;
+let timelineInterval = null;
+
+// متغيرات خط الرؤية
+let losPoints = [];
+let losMarkers = [];
+let losLine = null;
+
+/* ═══════════════════════════════════════════════════════════════════════
    تهيئة الخريطة
-════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════════════ */
 function initMap() {
+  // إنشاء الخريطة
   map = L.map('map', {
-    center: [33.3152, 44.3661],  // بغداد — نقطة مركزية افتراضية
+    center: [33.3152, 44.3661],  // بغداد
     zoom: 7,
     zoomControl: true,
     preferCanvas: true
@@ -784,85 +1360,121 @@ function initMap() {
     maxZoom: 22
   }).addTo(map);
 
-  // ─── أحداث الخريطة ───
-  map.on('click', e => {
-    if (drawMode) addDrawPoint(e);
-    else placeMainMarker(e.latlng);
+  // إضافة الطبقات الإضافية إلى الخريطة
+  bufferLayer.addTo(map);
+  viewshedLayer.addTo(map);
+  isochroneLayer.addTo(map);
+  quakeLayer.addTo(map);
+  importedLayer.addTo(map);
+
+  // معالجة النقر على الخريطة حسب السياق
+  map.on('click', function(e) {
+    if (drawMode) {
+      // وضع الرسم
+      addDrawPoint(e);
+    } else if (document.getElementById('modal-los').classList.contains('open')) {
+      // وضع خط الرؤية
+      addLOSPoint(e);
+    } else {
+      // الوضع العادي: وضع علامة رئيسية
+      placeMainMarker(e.latlng);
+    }
   });
 
-  map.on('mousemove', e => {
+  // عرض إحداثيات المؤشر أثناء التحريك
+  map.on('mousemove', function(e) {
     document.getElementById('cursor-info').textContent =
-      `${e.latlng.lat.toFixed(7)},  ${e.latlng.lng.toFixed(7)}`;
+      e.latlng.lat.toFixed(7) + ',  ' + e.latlng.lng.toFixed(7);
   });
 }
 
-/* ════════════════════════════════════════════
-   وضع علامة رئيسية قابلة للسحب
-════════════════════════════════════════════ */
-function placeMainMarker(latlng) {
-  if (mainMarker) map.removeLayer(mainMarker);
+/* ═══════════════════════════════════════════════════════════════════════
+   الوظائف الأساسية: علامة، بحث، رسم
+═══════════════════════════════════════════════════════════════════════ */
 
-  const icon = L.divIcon({
+/**
+ * وضع علامة رئيسية قابلة للسحب
+ */
+function placeMainMarker(latlng) {
+  if (mainMarker) {
+    map.removeLayer(mainMarker);
+  }
+
+  var icon = L.divIcon({
     className: '',
-    html: `<div style="
-      width:22px;height:22px;
-      background:radial-gradient(circle at 35% 35%,#88ccff,#1f6feb);
-      border:3px solid #fff;border-radius:50%;
-      box-shadow:0 2px 10px rgba(56,139,253,0.65);
-      cursor:grab;
-    "></div>`,
+    html: '<div style="width:22px;height:22px;background:radial-gradient(circle at 35% 35%,#88ccff,#1f6feb);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(56,139,253,0.65);cursor:grab;"></div>',
     iconSize: [22, 22],
     iconAnchor: [11, 11]
   });
 
-  mainMarker = L.marker(latlng, { draggable: true, icon }).addTo(map);
+  mainMarker = L.marker(latlng, { draggable: true, icon: icon }).addTo(map);
   setCoordPanel(latlng);
 
-  mainMarker.on('drag',    ev => setCoordPanel(ev.target.getLatLng()));
-  mainMarker.on('dragend', ev => setCoordPanel(ev.target.getLatLng()));
+  // تحديث الإحداثيات عند السحب
+  mainMarker.on('drag', function(ev) {
+    setCoordPanel(ev.target.getLatLng());
+  });
+  mainMarker.on('dragend', function(ev) {
+    setCoordPanel(ev.target.getLatLng());
+  });
 }
 
-/* ════════════════════════════════════════════
-   تحديث لوحة الإحداثيات
-════════════════════════════════════════════ */
+/**
+ * تحديث لوحة الإحداثيات
+ */
 function setCoordPanel(latlng, name) {
   document.getElementById('c-lat').textContent = latlng.lat.toFixed(7);
   document.getElementById('c-lng').textContent = latlng.lng.toFixed(7);
-  document.getElementById('place-name').textContent = name ? '📌 ' + name : '';
+  if (name) {
+    document.getElementById('place-name').textContent = '📌 ' + name;
+  } else {
+    document.getElementById('place-name').textContent = '';
+  }
 }
 
 /* ─── زر نسخ الإحداثيات ─── */
-document.getElementById('copy-coord-btn').addEventListener('click', () => {
-  const lat = document.getElementById('c-lat').textContent;
-  const lng = document.getElementById('c-lng').textContent;
-  if (lat.includes('-')) return showToast('لم يتم تحديد نقطة بعد!', true);
-  copyText(`${lat}, ${lng}`, `✓ تم نسخ: ${lat}, ${lng}`);
+document.getElementById('copy-coord-btn').addEventListener('click', function() {
+  var lat = document.getElementById('c-lat').textContent;
+  var lng = document.getElementById('c-lng').textContent;
+  if (lat.indexOf('-') !== -1) {
+    showToast('لم يتم تحديد نقطة بعد!', true);
+    return;
+  }
+  copyText(lat + ', ' + lng, '✓ تم نسخ: ' + lat + ', ' + lng);
 });
 
-/* ════════════════════════════════════════════
-   البحث — Nominatim API
-════════════════════════════════════════════ */
-let srTimer = null;
+/* ═══════════════════════════════════════════════════════════════════════
+   البحث باستخدام Nominatim
+═══════════════════════════════════════════════════════════════════════ */
+var srTimer = null;
 
 document.getElementById('search-input').addEventListener('keyup', function(e) {
   clearTimeout(srTimer);
-  const q = this.value.trim();
-  if (e.key === 'Enter') { doSearch(q); return; }
-  if (q.length > 2) srTimer = setTimeout(() => doSearch(q), 480);
-  else hideSR();
+  var q = this.value.trim();
+  if (e.key === 'Enter') {
+    doSearch(q);
+    return;
+  }
+  if (q.length > 2) {
+    srTimer = setTimeout(function() { doSearch(q); }, 480);
+  } else {
+    hideSR();
+  }
 });
 
 async function doSearch(q) {
   if (!q || q.length < 2) return;
-  const box = document.getElementById('search-results');
+
+  var box = document.getElementById('search-results');
   box.innerHTML = '<div class="sr-item sr-loading">⏳ جارٍ البحث…</div>';
   box.style.display = 'block';
 
   try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=8&accept-language=ar,en`;
-    const res  = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' +
+              encodeURIComponent(q) + '&limit=8&accept-language=ar,en';
+    var res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
 
     if (!data.length) {
       box.innerHTML = '<div class="sr-item sr-error">لا توجد نتائج مطابقة</div>';
@@ -870,15 +1482,15 @@ async function doSearch(q) {
     }
 
     box.innerHTML = '';
-    data.forEach(item => {
-      const d = document.createElement('div');
-      d.className  = 'sr-item';
+    data.forEach(function(item) {
+      var d = document.createElement('div');
+      d.className = 'sr-item';
       d.textContent = item.display_name;
-      d.addEventListener('click', () => {
-        const ll = L.latLng(parseFloat(item.lat), parseFloat(item.lon));
+      d.addEventListener('click', function() {
+        var ll = L.latLng(parseFloat(item.lat), parseFloat(item.lon));
         map.setView(ll, 14);
         placeMainMarker(ll);
-        const name = item.display_name.split(',')[0].trim();
+        var name = item.display_name.split(',')[0].trim();
         setCoordPanel(ll, name);
         hideSR();
         document.getElementById('search-input').value = '';
@@ -886,37 +1498,44 @@ async function doSearch(q) {
       box.appendChild(d);
     });
   } catch (err) {
-    box.innerHTML = `<div class="sr-item sr-error">⚠ خطأ في الاتصال: ${err.message}</div>`;
+    box.innerHTML = '<div class="sr-item sr-error">⚠ خطأ في الاتصال: ' + err.message + '</div>';
   }
 }
 
-function hideSR() { document.getElementById('search-results').style.display = 'none'; }
+function hideSR() {
+  document.getElementById('search-results').style.display = 'none';
+}
 
-document.addEventListener('click', e => {
-  if (!document.querySelector('.search-wrap').contains(e.target)) hideSR();
+// إخفاء نتائج البحث عند النقر خارجها
+document.addEventListener('click', function(e) {
+  if (!document.querySelector('.search-wrap').contains(e.target)) {
+    hideSR();
+  }
 });
 
-/* ════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════
    وضع الرسم — رسم المضلعات
-════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════════════ */
 document.getElementById('btn-draw').addEventListener('click', startDraw);
 document.getElementById('btn-finish').addEventListener('click', finishDraw);
 document.getElementById('btn-cancel').addEventListener('click', cancelDraw);
 
 function startDraw() {
-  drawMode   = true;
+  drawMode = true;
   drawPoints = [];
-  document.getElementById('btn-draw').style.display   = 'none';
-  document.getElementById('btn-finish').style.display  = 'inline-flex';
-  document.getElementById('btn-cancel').style.display  = 'inline-flex';
+  document.getElementById('btn-draw').style.display = 'none';
+  document.getElementById('btn-finish').style.display = 'inline-flex';
+  document.getElementById('btn-cancel').style.display = 'inline-flex';
   document.getElementById('draw-banner').style.display = 'block';
   document.getElementById('map').classList.add('drawing-cursor');
 }
 
-/* إضافة نقطة للمضلع */
+/**
+ * إضافة نقطة إلى المضلع أثناء الرسم
+ */
 function addDrawPoint(e) {
   L.DomEvent.stopPropagation(e);
-  const ll = e.latlng;
+  var ll = e.latlng;
 
   // إغلاق المضلع عند النقر بالقرب من أول نقطة
   if (drawPoints.length >= 3 && map.distance(ll, drawPoints[0]) < CLOSE_DIST_M) {
@@ -927,36 +1546,35 @@ function addDrawPoint(e) {
   drawPoints.push(ll);
 
   // أيقونة نقطة الرسم
-  const isFirst = drawPoints.length === 1;
-  const dotIcon = L.divIcon({
+  var isFirst = (drawPoints.length === 1);
+  var dotIcon = L.divIcon({
     className: '',
-    html: `<div style="
-      width:${isFirst ? 14 : 10}px;
-      height:${isFirst ? 14 : 10}px;
-      background:${isFirst ? '#ffc947' : '#e63946'};
-      border:2px solid #fff;border-radius:50%;
-      box-shadow:0 1px 6px rgba(0,0,0,0.6);
-    "></div>`,
-    iconSize:   isFirst ? [14,14] : [10,10],
-    iconAnchor: isFirst ? [7,7]   : [5,5]
+    html: '<div style="width:' + (isFirst ? 14 : 10) + 'px;height:' + (isFirst ? 14 : 10) +
+          'px;background:' + (isFirst ? '#ffc947' : '#e63946') +
+          ';border:2px solid #fff;border-radius:50%;box-shadow:0 1px 6px rgba(0,0,0,0.6);"></div>',
+    iconSize: [isFirst ? 14 : 10, isFirst ? 14 : 10],
+    iconAnchor: [isFirst ? 7 : 5, isFirst ? 7 : 5]
   });
-  drawDots.push(L.marker(ll, { icon: dotIcon, zIndexOffset: 1000 }).addTo(map));
 
-  // تحديث الخط المرسوم
+  drawDots.push(L.marker(ll, { icon: dotIcon, zIndexOffset: 1000 }).addTo(map));
   redrawLine();
 }
 
 function redrawLine() {
-  if (drawLine) { map.removeLayer(drawLine); drawLine = null; }
+  if (drawLine) {
+    map.removeLayer(drawLine);
+    drawLine = null;
+  }
   if (drawPoints.length >= 2) {
-    drawLine = L.polyline([...drawPoints, drawPoints[0]], {
-      color: '#e63946', weight: 2.5,
-      dashArray: '8,5', opacity: .9
+    drawLine = L.polyline(drawPoints.concat([drawPoints[0]]), {
+      color: '#e63946',
+      weight: 2.5,
+      dashArray: '8,5',
+      opacity: .9
     }).addTo(map);
   }
 }
 
-/* إنهاء الرسم وإنشاء المنطقة */
 function finishDraw() {
   if (drawPoints.length < 3) {
     showToast('يجب رسم ٣ نقاط على الأقل!', true);
@@ -964,27 +1582,29 @@ function finishDraw() {
   }
 
   zoneSeq++;
-  const color = ZONE_COLORS[(zoneSeq - 1) % ZONE_COLORS.length];
+  var color = ZONE_COLORS[(zoneSeq - 1) % ZONE_COLORS.length];
 
-  const zone = {
-    id:          zoneSeq,
-    name:        `المنطقة ${zoneSeq}`,
-    points:      [...drawPoints],
-    color,
-    layer:       null,
+  var zone = {
+    id: zoneSeq,
+    name: 'المنطقة ' + zoneSeq,
+    points: drawPoints.slice(),
+    color: color,
+    layer: null,
     editMarkers: []
   };
 
   zone.layer = L.polygon(zone.points, {
-    color, fillColor: color,
-    weight: 2.2, fillOpacity: 0.17
+    color: color,
+    fillColor: color,
+    weight: 2.2,
+    fillOpacity: 0.17
   }).addTo(map);
 
   zones.push(zone);
   clearDraw();
   stopDraw();
   renderZones();
-  showToast(`✅ تم إنشاء "${zone.name}" بنجاح`);
+  showToast('✅ تم إنشاء "' + zone.name + '" بنجاح');
 }
 
 function cancelDraw() {
@@ -994,104 +1614,110 @@ function cancelDraw() {
 
 function stopDraw() {
   drawMode = false;
-  document.getElementById('btn-draw').style.display   = 'inline-flex';
-  document.getElementById('btn-finish').style.display  = 'none';
-  document.getElementById('btn-cancel').style.display  = 'none';
+  document.getElementById('btn-draw').style.display = 'inline-flex';
+  document.getElementById('btn-finish').style.display = 'none';
+  document.getElementById('btn-cancel').style.display = 'none';
   document.getElementById('draw-banner').style.display = 'none';
   document.getElementById('map').classList.remove('drawing-cursor');
 }
 
 function clearDraw() {
-  if (drawLine) { map.removeLayer(drawLine); drawLine = null; }
-  drawDots.forEach(d => map.removeLayer(d));
-  drawDots   = [];
+  if (drawLine) {
+    map.removeLayer(drawLine);
+    drawLine = null;
+  }
+  drawDots.forEach(function(d) { map.removeLayer(d); });
+  drawDots = [];
   drawPoints = [];
 }
 
-/* ════════════════════════════════════════════
-   حسابات المنطقة — Turf.js (WGS-84 كروية)
-════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════
+   حسابات المنطقة باستخدام Turf.js (WGS-84 كروية)
+═══════════════════════════════════════════════════════════════════════ */
 function computeStats(zone) {
   // بناء مصفوفة إحداثيات GeoJSON [lng, lat]
-  const coords = zone.points.map(p => [p.lng, p.lat]);
+  var coords = zone.points.map(function(p) {
+    return [p.lng, p.lat];
+  });
   coords.push(coords[0]); // إغلاق المضلع
 
-  const poly    = turf.polygon([coords]);
-  const areaM2  = turf.area(poly);                              // متر²
-  const areaKm2 = areaM2 / 1e6;                                 // كم²
+  var poly = turf.polygon([coords]);
+  var areaM2 = turf.area(poly);
+  var areaKm2 = areaM2 / 1e6;
+  var periKm = turf.length(turf.polygonToLine(poly), { units: 'kilometers' });
+  var centroid = turf.centroid(poly);
+  var cLng = centroid.geometry.coordinates[0];
+  var cLat = centroid.geometry.coordinates[1];
 
-  // المحيط
-  const line   = turf.polygonToLine(poly);
-  const periKm = turf.length(line, { units: 'kilometers' });
-
-  // مركز الثقل
-  const centroid = turf.centroid(poly);
-  const [cLng, cLat] = centroid.geometry.coordinates;
-
-  return { areaM2, areaKm2, periKm, cLat, cLng };
+  return {
+    areaM2: areaM2,
+    areaKm2: areaKm2,
+    periKm: periKm,
+    cLat: cLat,
+    cLng: cLng
+  };
 }
 
-/* ════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════
    عرض قائمة المناطق الجانبية
-════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════════════ */
 function renderZones() {
-  const list = document.getElementById('zones-list');
+  var list = document.getElementById('zones-list');
   document.getElementById('zone-badge').textContent = zones.length;
 
   if (!zones.length) {
-    list.innerHTML = `<div class="empty-hint">
-      لا توجد مناطق بعد<br>
-      استخدم زر <strong>"رسم منطقة"</strong> للبدء
-    </div>`;
+    list.innerHTML = '<div class="empty-hint">لا توجد مناطق بعد<br>استخدم زر <strong>"رسم"</strong> للبدء</div>';
     return;
   }
 
   list.innerHTML = '';
 
-  zones.forEach((zone, i) => {
-    const stats    = computeStats(zone);
-    const isEditing = editIdx === i;
+  zones.forEach(function(zone, i) {
+    var stats = computeStats(zone);
+    var isEditing = (editIdx === i);
 
-    const card = document.createElement('div');
+    var card = document.createElement('div');
     card.className = 'zone-card';
     card.style.borderRightColor = zone.color;
 
-    card.innerHTML = `
-      <div class="zc-head">
-        <span class="z-dot" style="background:${zone.color}"></span>
-        <input class="z-name-input" value="${escHtml(zone.name)}"
-               onchange="zones[${i}].name = this.value" />
-      </div>
-      <div class="z-meta">
-        🔺 ${zone.points.length} رأس &nbsp;|&nbsp;
-        📐 ${stats.areaKm2 < 0.001
+    card.innerHTML =
+      '<div class="zc-head">' +
+        '<span class="z-dot" style="background:' + zone.color + '"></span>' +
+        '<input class="z-name-input" value="' + escHtml(zone.name) + '" onchange="zones[' + i + '].name = this.value" />' +
+      '</div>' +
+      '<div class="z-meta">' +
+        '🔺 ' + zone.points.length + ' رأس &nbsp;|&nbsp;' +
+        '📐 ' + (stats.areaKm2 < 0.001
           ? (stats.areaM2).toFixed(2) + ' م²'
-          : stats.areaKm2.toFixed(5) + ' كم²'}
-      </div>
-      <div class="z-actions">
-        <button class="z-btn info" onclick="openModal(${i})">📊 تفاصيل</button>
-        <button class="z-btn edit ${isEditing ? 'active-edit' : ''}"
-                id="eb-${i}" onclick="toggleEdit(${i})">
-          ${isEditing ? '💾 حفظ' : '✏️ تعديل'}
-        </button>
-        <button class="z-btn exp" onclick="doExport(${i},'geojson')">GeoJSON</button>
-        <button class="z-btn del" onclick="deleteZone(${i})">🗑</button>
-      </div>`;
+          : stats.areaKm2.toFixed(5) + ' كم²') +
+      '</div>' +
+      '<div class="z-actions">' +
+        '<button class="z-btn info" onclick="openModal(' + i + ')">📊 تفاصيل</button>' +
+        '<button class="z-btn edit ' + (isEditing ? 'active-edit' : '') + '" onclick="toggleEdit(' + i + ')">' +
+          (isEditing ? '💾 حفظ' : '✏️ تعديل') +
+        '</button>' +
+        '<button class="z-btn exp" onclick="doExport(' + i + ",'geojson'" + ')">GeoJSON</button>' +
+        '<button class="z-btn exp" onclick="doExport(' + i + ",'kml'" + ')" style="background:#ff9800;">KML</button>' +
+        '<button class="z-btn del" onclick="deleteZone(' + i + ')">🗑</button>' +
+      '</div>';
 
     list.appendChild(card);
   });
 }
 
-/* ════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════
    تعديل رؤوس المضلع بالسحب
-════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════════════ */
 function toggleEdit(idx) {
-  // إيقاف أي تعديل سابق
+  // إذا كان هناك منطقة قيد التعديل بالفعل
   if (editIdx !== null) {
     stopEdit(editIdx);
-    const wasIdx = editIdx;
+    var wasIdx = editIdx;
     editIdx = null;
-    if (wasIdx === idx) { renderZones(); return; }
+    if (wasIdx === idx) {
+      renderZones();
+      return; // تم إيقاف التعديل لنفس المنطقة
+    }
   }
 
   editIdx = idx;
@@ -1100,29 +1726,31 @@ function toggleEdit(idx) {
 }
 
 function startEdit(idx) {
-  const zone = zones[idx];
+  var zone = zones[idx];
 
-  zone.points.forEach((pt, i) => {
-    const icon = L.divIcon({
+  zone.points.forEach(function(pt, i) {
+    var icon = L.divIcon({
       className: '',
-      html: `<div style="
-        width:14px;height:14px;
-        background:${zone.color};
-        border:2.5px solid #fff;border-radius:50%;
-        box-shadow:0 2px 8px rgba(0,0,0,0.7);
-        cursor:move;
-      "></div>`,
-      iconSize: [14,14], iconAnchor: [7,7]
+      html: '<div style="width:14px;height:14px;background:' + zone.color +
+            ';border:2.5px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.7);cursor:move;"></div>',
+      iconSize: [14, 14],
+      iconAnchor: [7, 7]
     });
 
-    const m = L.marker(pt, { draggable: true, icon, zIndexOffset: 2000 }).addTo(map);
+    var m = L.marker(pt, {
+      draggable: true,
+      icon: icon,
+      zIndexOffset: 2000
+    }).addTo(map);
 
-    m.on('drag', ev => {
+    m.on('drag', function(ev) {
       zone.points[i] = ev.target.getLatLng();
       zone.layer.setLatLngs(zone.points);
     });
 
-    m.on('dragend', () => renderZones());
+    m.on('dragend', function() {
+      renderZones();
+    });
 
     zone.editMarkers.push(m);
   });
@@ -1130,56 +1758,54 @@ function startEdit(idx) {
 
 function stopEdit(idx) {
   if (!zones[idx]) return;
-  zones[idx].editMarkers.forEach(m => map.removeLayer(m));
+  zones[idx].editMarkers.forEach(function(m) {
+    map.removeLayer(m);
+  });
   zones[idx].editMarkers = [];
 }
 
-/* ════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════
    حذف منطقة
-════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════════════ */
 function deleteZone(idx) {
   stopEdit(idx);
   map.removeLayer(zones[idx].layer);
-
-  if (editIdx === idx)       editIdx = null;
-  else if (editIdx > idx)    editIdx--;
-
-  if (modalIdx === idx)      modalIdx = null;
-  else if (modalIdx > idx)   modalIdx--;
-
   zones.splice(idx, 1);
+
+  if (editIdx === idx) editIdx = null;
+  else if (editIdx > idx) editIdx--;
+
+  if (modalIdx === idx) modalIdx = null;
+  else if (modalIdx > idx) modalIdx--;
+
   renderZones();
   showToast('تم حذف المنطقة');
 }
 
-/* ════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════
    نافذة تفاصيل المنطقة
-════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════════════ */
 function openModal(idx) {
   modalIdx = idx;
-  const zone  = zones[idx];
-  const stats = computeStats(zone);
+  var zone = zones[idx];
+  var stats = computeStats(zone);
 
-  document.getElementById('m-title').textContent   = `📊 ${zone.name}`;
+  document.getElementById('m-title').textContent = '📊 ' + zone.name;
   document.getElementById('m-verts-count').textContent = zone.points.length;
-  document.getElementById('m-area-km').textContent =
-    stats.areaKm2.toFixed(8) + ' كم²';
-  document.getElementById('m-area-m2').textContent =
-    Math.round(stats.areaM2).toLocaleString('ar') + ' م²';
-  document.getElementById('m-perimeter').textContent =
-    stats.periKm.toFixed(6) + ' كم';
-  document.getElementById('m-centroid').textContent =
-    `${stats.cLat.toFixed(7)}, ${stats.cLng.toFixed(7)}`;
+  document.getElementById('m-area-km').textContent = stats.areaKm2.toFixed(8) + ' كم²';
+  document.getElementById('m-area-m2').textContent = Math.round(stats.areaM2).toLocaleString('ar') + ' م²';
+  document.getElementById('m-perimeter').textContent = stats.periKm.toFixed(6) + ' كم';
+  document.getElementById('m-centroid').textContent = stats.cLat.toFixed(7) + ', ' + stats.cLng.toFixed(7);
 
   // قائمة الرؤوس
-  const vc = document.getElementById('verts-container');
+  var vc = document.getElementById('verts-container');
   vc.innerHTML = '';
-  zone.points.forEach((p, i) => {
-    const row = document.createElement('div');
+  zone.points.forEach(function(p, i) {
+    var row = document.createElement('div');
     row.className = 'vert-row';
     row.innerHTML =
-      `<span class="v-idx">[${String(i+1).padStart(2,'0')}]</span>` +
-      `${p.lat.toFixed(8)},&nbsp;&nbsp;${p.lng.toFixed(8)}`;
+      '<span class="v-idx">[' + String(i + 1).padStart(2, '0') + ']</span>' +
+      p.lat.toFixed(8) + ',&nbsp;&nbsp;' + p.lng.toFixed(8);
     vc.appendChild(row);
   });
 
@@ -1191,41 +1817,40 @@ function closeModal() {
 }
 
 document.getElementById('m-btn-close').addEventListener('click', closeModal);
-document.getElementById('modal-bg').addEventListener('click', e => {
+document.getElementById('modal-bg').addEventListener('click', function(e) {
   if (e.target === document.getElementById('modal-bg')) closeModal();
 });
 
 /* ─── أزرار المودال ─── */
-document.getElementById('m-btn-geojson').addEventListener('click', () => {
+document.getElementById('m-btn-geojson').addEventListener('click', function() {
   if (modalIdx !== null) doExport(modalIdx, 'geojson');
 });
-document.getElementById('m-btn-json').addEventListener('click', () => {
+document.getElementById('m-btn-json').addEventListener('click', function() {
   if (modalIdx !== null) doExport(modalIdx, 'json');
 });
-document.getElementById('m-btn-copy').addEventListener('click', () => {
+document.getElementById('m-btn-copy').addEventListener('click', function() {
   if (modalIdx === null) return;
-  const zone = zones[modalIdx];
-  const text = zone.points.map((p, i) =>
-    `[${i+1}] ${p.lat.toFixed(8)}, ${p.lng.toFixed(8)}`
-  ).join('\n');
-  copyText(text, `✓ تم نسخ ${zone.points.length} إحداثيات`);
+  var zone = zones[modalIdx];
+  var text = zone.points.map(function(p, i) {
+    return '[' + (i + 1) + '] ' + p.lat.toFixed(8) + ', ' + p.lng.toFixed(8);
+  }).join('\n');
+  copyText(text, '✓ تم نسخ ' + zone.points.length + ' إحداثيات');
 });
 
-/* ════════════════════════════════════════════
-   تصدير المنطقة (GeoJSON / JSON)
-════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════
+   تصدير المنطقة (GeoJSON / JSON / KML)
+═══════════════════════════════════════════════════════════════════════ */
 function doExport(idx, fmt) {
-  const zone  = zones[idx];
-  const stats = computeStats(zone);
+  var zone = zones[idx];
+  var stats = computeStats(zone);
 
   // إحداثيات مغلقة بدقة 8 منازل
-  const coords = zone.points.map(p => [
-    parseFloat(p.lng.toFixed(8)),
-    parseFloat(p.lat.toFixed(8))
-  ]);
+  var coords = zone.points.map(function(p) {
+    return [parseFloat(p.lng.toFixed(8)), parseFloat(p.lat.toFixed(8))];
+  });
   coords.push(coords[0]);
 
-  let content, fname, mime;
+  var content, fname, mime;
 
   if (fmt === 'geojson') {
     content = JSON.stringify({
@@ -1233,75 +1858,724 @@ function doExport(idx, fmt) {
       features: [{
         type: 'Feature',
         properties: {
-          name:         zone.name,
-          id:           zone.id,
-          area_km2:     stats.areaKm2,
-          area_m2:      stats.areaM2,
+          name: zone.name,
+          id: zone.id,
+          area_km2: stats.areaKm2,
           perimeter_km: stats.periKm,
           centroid: { lat: stats.cLat, lng: stats.cLng }
         },
         geometry: { type: 'Polygon', coordinates: [coords] }
       }]
     }, null, 2);
-    fname = `zone_${zone.id}.geojson`;
-    mime  = 'application/geo+json';
+    fname = 'zone_' + zone.id + '.geojson';
+    mime = 'application/geo+json';
+
+  } else if (fmt === 'kml') {
+    var geoJson = {
+      type: 'Feature',
+      geometry: { type: 'Polygon', coordinates: [coords] },
+      properties: { name: zone.name }
+    };
+    content = tokml(geoJson);
+    fname = 'zone_' + zone.id + '.kml';
+    mime = 'application/vnd.google-earth.kml+xml';
+
   } else {
     content = JSON.stringify({
-      name:  zone.name,
-      id:    zone.id,
+      name: zone.name,
+      id: zone.id,
       stats: {
-        vertices:     zone.points.length,
-        area_km2:     stats.areaKm2,
-        area_m2:      stats.areaM2,
+        vertices: zone.points.length,
+        area_km2: stats.areaKm2,
+        area_m2: stats.areaM2,
         perimeter_km: stats.periKm,
         centroid: { lat: stats.cLat, lng: stats.cLng }
       },
-      vertices: zone.points.map((p, i) => ({
-        index: i + 1,
-        lat:   parseFloat(p.lat.toFixed(8)),
-        lng:   parseFloat(p.lng.toFixed(8))
-      }))
+      vertices: zone.points.map(function(p, i) {
+        return {
+          index: i + 1,
+          lat: parseFloat(p.lat.toFixed(8)),
+          lng: parseFloat(p.lng.toFixed(8))
+        };
+      })
     }, null, 2);
-    fname = `zone_${zone.id}.json`;
-    mime  = 'application/json';
+    fname = 'zone_' + zone.id + '.json';
+    mime = 'application/json';
   }
 
-  const blob = new Blob([content], { type: mime });
-  const a    = Object.assign(document.createElement('a'), {
-    href:     URL.createObjectURL(blob),
+  var blob = new Blob([content], { type: mime });
+  var a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob),
     download: fname
   });
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  showToast(`✓ تم تصدير ${zone.name} (${fmt.toUpperCase()})`);
+  showToast('✓ تم تصدير ' + zone.name + ' (' + fmt.toUpperCase() + ')');
 }
 
-/* ════════════════════════════════════════════
-   مسح العلامة الرئيسية
-════════════════════════════════════════════ */
-document.getElementById('btn-clear').addEventListener('click', () => {
-  if (mainMarker) { map.removeLayer(mainMarker); mainMarker = null; }
-  document.getElementById('c-lat').textContent  = '-- ------';
-  document.getElementById('c-lng').textContent  = '-- ------';
+/* ─── مسح العلامة الرئيسية ─── */
+document.getElementById('btn-clear').addEventListener('click', function() {
+  if (mainMarker) {
+    map.removeLayer(mainMarker);
+    mainMarker = null;
+  }
+  document.getElementById('c-lat').textContent = '-- ------';
+  document.getElementById('c-lng').textContent = '-- ------';
   document.getElementById('place-name').textContent = '';
 });
 
-/* ════════════════════════════════════════════
-   دوال مساعدة
-════════════════════════════════════════════ */
+/* ╔══════════════════════════════════════════════════════════════════════╗
+   ║           الميزات الاستخباراتية العشر                               ║
+   ╚══════════════════════════════════════════════════════════════════════╝ */
 
-/* نسخ نص للحافظة */
+/* ───────────────────────────────────────────────
+   1. مناطق النفوذ والدوائر الأمنية (Buffer & Range Rings)
+─────────────────────────────────────────────── */
+document.getElementById('tool-buffer').addEventListener('click', function() {
+  toggleModal('modal-buffer');
+});
+
+document.getElementById('buffer-apply').addEventListener('click', function() {
+  if (!mainMarker) {
+    showToast('ضع علامة على الخريطة أولاً', true);
+    return;
+  }
+  var radius = parseFloat(document.getElementById('buffer-radius').value);
+  var center = mainMarker.getLatLng();
+
+  // استخدام Turf.js لإنشاء دائرة كروية
+  var circle = turf.circle([center.lng, center.lat], radius / 1000, {
+    steps: 64,
+    units: 'kilometers'
+  });
+
+  L.geoJSON(circle, {
+    style: {
+      color: '#00d4ff',
+      weight: 1.5,
+      fillOpacity: 0.08
+    }
+  }).addTo(bufferLayer);
+
+  showToast('تم رسم دائرة نصف قطرها ' + radius + ' متر');
+});
+
+document.getElementById('buffer-clear').addEventListener('click', function() {
+  bufferLayer.clearLayers();
+  showToast('تم مسح جميع الدوائر');
+});
+
+/* ───────────────────────────────────────────────
+   2. خط الرؤية (Line of Sight)
+─────────────────────────────────────────────── */
+document.getElementById('tool-los').addEventListener('click', function() {
+  toggleModal('modal-los');
+  // إعادة تعيين نقاط LOS
+  losPoints = [];
+  losMarkers.forEach(function(m) { map.removeLayer(m); });
+  losMarkers = [];
+  if (losLine) {
+    map.removeLayer(losLine);
+    losLine = null;
+  }
+  document.getElementById('los-result').innerHTML = '';
+  var ctx = document.getElementById('los-canvas').getContext('2d');
+  ctx.clearRect(0, 0, 300, 200);
+});
+
+function addLOSPoint(e) {
+  if (losPoints.length >= 2) return;
+  losPoints.push(e.latlng);
+
+  var icon = L.divIcon({
+    className: '',
+    html: '<div style="width:12px;height:12px;background:#ff9800;border:2px solid #fff;border-radius:50%;"></div>',
+    iconSize: [12, 12],
+    iconAnchor: [6, 6]
+  });
+
+  var m = L.marker(e.latlng, { icon: icon }).addTo(map);
+  losMarkers.push(m);
+
+  if (losPoints.length === 2) {
+    losLine = L.polyline(losPoints, { color: '#ff9800' }).addTo(map);
+    computeLOS();
+  }
+}
+
+async function computeLOS() {
+  var p1 = losPoints[0];
+  var p2 = losPoints[1];
+
+  try {
+    // الحصول على الارتفاعات من Open-Elevation API
+    var res = await fetch('https://api.open-elevation.com/api/v1/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        locations: [
+          { latitude: p1.lat, longitude: p1.lng },
+          { latitude: p2.lat, longitude: p2.lng }
+        ]
+      })
+    });
+
+    var data = await res.json();
+    var elev1 = data.results[0].elevation;
+    var elev2 = data.results[1].elevation;
+
+    // حساب المسافة بين النقطتين
+    var dist = turf.distance(
+      turf.point([p1.lng, p1.lat]),
+      turf.point([p2.lng, p2.lat]),
+      { units: 'kilometers' }
+    );
+
+    // حساب انحناء الأرض (نصف قطر 6371 كم)
+    var R = 6371;
+    var d = dist;
+    var h1 = elev1;
+    var h2 = elev2;
+
+    // أقصى ارتفاع للانحناء عند المنتصف (بالمتر)
+    var midCurvature = (d * d) / (8 * R) * 1000;
+    var losClear = ((h1 + h2) / 2) >= ((elev1 + elev2) / 2 + midCurvature)
+      ? 'خط الرؤية مفتوح ✅'
+      : 'يوجد حجب ❌ (قد يكون هناك عائق أو انحناء أرضي)';
+
+    document.getElementById('los-result').innerHTML =
+      'المسافة: <strong>' + dist.toFixed(3) + ' كم</strong><br>' +
+      'ارتفاع النقطة 1: <strong>' + elev1.toFixed(1) + ' م</strong><br>' +
+      'ارتفاع النقطة 2: <strong>' + elev2.toFixed(1) + ' م</strong><br>' +
+      '<strong>' + losClear + '</strong>';
+
+    drawLOSChart(elev1, elev2, dist);
+
+  } catch (err) {
+    showToast('خطأ في جلب الارتفاعات: ' + err.message, true);
+  }
+}
+
+function drawLOSChart(e1, e2, distKm) {
+  var canvas = document.getElementById('los-canvas');
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // رسم مبسط لخط الرؤية
+  var maxElev = Math.max(e1, e2, 100);
+  var scaleY = 150 / maxElev;
+
+  ctx.beginPath();
+  ctx.moveTo(30, 160 - e1 * scaleY);
+  ctx.lineTo(canvas.width - 30, 160 - e2 * scaleY);
+  ctx.strokeStyle = '#ff9800';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // تسميات
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '10px monospace';
+  ctx.fillText(e1.toFixed(0) + 'م', 30, 155 - e1 * scaleY);
+  ctx.fillText(e2.toFixed(0) + 'م', canvas.width - 30, 155 - e2 * scaleY);
+  ctx.fillText(distKm.toFixed(2) + ' كم', canvas.width / 2 - 20, 175);
+}
+
+document.getElementById('los-clear').addEventListener('click', function() {
+  losMarkers.forEach(function(m) { map.removeLayer(m); });
+  losMarkers = [];
+  losPoints = [];
+  if (losLine) {
+    map.removeLayer(losLine);
+    losLine = null;
+  }
+  document.getElementById('los-result').innerHTML = '';
+  var ctx = document.getElementById('los-canvas').getContext('2d');
+  ctx.clearRect(0, 0, 300, 200);
+});
+
+/* ───────────────────────────────────────────────
+   3. تحليل التغطية (Viewshed)
+─────────────────────────────────────────────── */
+document.getElementById('tool-viewshed').addEventListener('click', function() {
+  toggleModal('modal-viewshed');
+});
+
+document.getElementById('viewshed-apply').addEventListener('click', function() {
+  if (!mainMarker) {
+    showToast('ضع علامة على الخريطة أولاً', true);
+    return;
+  }
+
+  var angle = parseFloat(document.getElementById('viewshed-angle').value);
+  var range = parseFloat(document.getElementById('viewshed-range').value);
+  var center = mainMarker.getLatLng();
+
+  var points = [center];
+  var steps = 16;
+
+  for (var i = -angle / 2; i <= angle / 2; i += angle / steps) {
+    var bearing = i; // يمكن إضافة اتجاه الشمال هنا
+    var dest = turf.destination(
+      turf.point([center.lng, center.lat]),
+      range,
+      bearing,
+      { units: 'kilometers' }
+    );
+    points.push(L.latLng(dest.geometry.coordinates[1], dest.geometry.coordinates[0]));
+  }
+
+  L.polygon(points, {
+    color: '#9c27b0',
+    fillColor: '#9c27b0',
+    fillOpacity: 0.1,
+    weight: 1.5
+  }).addTo(viewshedLayer);
+
+  showToast('تم رسم قطاع التغطية (' + angle + '°، ' + range + ' كم)');
+});
+
+document.getElementById('viewshed-clear').addEventListener('click', function() {
+  viewshedLayer.clearLayers();
+  showToast('تم مسح قطاعات التغطية');
+});
+
+/* ───────────────────────────────────────────────
+   4. استيراد KML / GeoJSON
+─────────────────────────────────────────────── */
+document.getElementById('tool-import').addEventListener('click', function() {
+  toggleModal('modal-import');
+});
+
+document.getElementById('import-load').addEventListener('click', function() {
+  var fileInput = document.getElementById('import-file');
+  if (!fileInput.files.length) {
+    showToast('اختر ملفاً أولاً', true);
+    return;
+  }
+
+  var file = fileInput.files[0];
+  var reader = new FileReader();
+
+  reader.onload = function(e) {
+    try {
+      var geojson;
+
+      if (file.name.toLowerCase().endsWith('.kml')) {
+        // تحويل KML إلى GeoJSON
+        var kmlDoc = new DOMParser().parseFromString(e.target.result, 'text/xml');
+        geojson = toGeoJSON.kml(kmlDoc);
+      } else {
+        geojson = JSON.parse(e.target.result);
+      }
+
+      importedLayer.clearLayers();
+
+      L.geoJSON(geojson, {
+        style: function() {
+          return { color: '#ff9800', weight: 2, fillOpacity: 0.1 };
+        },
+        pointToLayer: function(feature, latlng) {
+          return L.circleMarker(latlng, {
+            radius: 6,
+            color: '#ff9800',
+            fillColor: '#ff9800',
+            fillOpacity: 0.6
+          });
+        }
+      }).addTo(importedLayer);
+
+      map.fitBounds(importedLayer.getBounds());
+      showToast('✅ تم استيراد الملف بنجاح (' + file.name + ')');
+
+    } catch (err) {
+      showToast('❌ خطأ في قراءة الملف: ' + err.message, true);
+    }
+  };
+
+  reader.readAsText(file);
+});
+
+/* ───────────────────────────────────────────────
+   5. المسار الزمني (Timeline)
+─────────────────────────────────────────────── */
+document.getElementById('tool-timeline').addEventListener('click', function() {
+  toggleModal('modal-timeline');
+});
+
+document.getElementById('timeline-start').addEventListener('click', function() {
+  timelinePoints = [];
+  map.on('click', addTimelinePoint);
+  document.getElementById('timeline-start').disabled = true;
+  document.getElementById('timeline-stop').disabled = false;
+  showToast('انقر على الخريطة لإضافة نقاط المسار...');
+});
+
+function addTimelinePoint(e) {
+  timelinePoints.push({
+    latlng: e.latlng,
+    time: new Date().toISOString()
+  });
+
+  L.circleMarker(e.latlng, {
+    radius: 5,
+    color: '#ffc947',
+    fillColor: '#ffc947',
+    fillOpacity: 0.7
+  }).addTo(map).bindPopup(String(timelinePoints.length));
+
+  document.getElementById('timeline-slider').max = timelinePoints.length - 1;
+  document.getElementById('timeline-slider').disabled = false;
+}
+
+document.getElementById('timeline-stop').addEventListener('click', function() {
+  map.off('click', addTimelinePoint);
+  document.getElementById('timeline-start').disabled = false;
+  document.getElementById('timeline-stop').disabled = true;
+  showToast('تم تسجيل ' + timelinePoints.length + ' نقطة');
+});
+
+document.getElementById('timeline-play').addEventListener('click', function() {
+  if (!timelinePoints.length) {
+    showToast('لا توجد نقاط مسجلة', true);
+    return;
+  }
+
+  var idx = 0;
+
+  if (timelineMarker) {
+    map.removeLayer(timelineMarker);
+  }
+
+  timelineMarker = L.circleMarker(timelinePoints[0].latlng, {
+    radius: 8,
+    color: '#e63946',
+    fillColor: '#e63946',
+    fillOpacity: 0.8
+  }).addTo(map);
+
+  // إيقاف أي فاصل زمني سابق
+  if (timelineInterval) {
+    clearInterval(timelineInterval);
+  }
+
+  timelineInterval = setInterval(function() {
+    idx = (idx + 1) % timelinePoints.length;
+    timelineMarker.setLatLng(timelinePoints[idx].latlng);
+    document.getElementById('timeline-slider').value = idx;
+
+    // فحص إنذار المناطق مع كل حركة
+    checkGeofenceForPoint(timelinePoints[idx].latlng);
+  }, 1000);
+});
+
+document.getElementById('timeline-slider').addEventListener('input', function() {
+  var idx = parseInt(this.value);
+  if (timelineMarker && timelinePoints[idx]) {
+    timelineMarker.setLatLng(timelinePoints[idx].latlng);
+  }
+});
+
+/* ───────────────────────────────────────────────
+   6. تجميع العلامات والخريطة الحرارية (Clustering & Heatmap)
+─────────────────────────────────────────────── */
+document.getElementById('btn-cluster-toggle').addEventListener('click', function() {
+  if (map.hasLayer(clusterGroup)) {
+    map.removeLayer(clusterGroup);
+    this.classList.remove('active');
+  } else {
+    map.addLayer(clusterGroup);
+    this.classList.add('active');
+
+    // إذا كانت المجموعة فارغة، نضيف نقاطاً عشوائية للاختبار
+    if (clusterGroup.getLayers().length === 0) {
+      for (var i = 0; i < 50; i++) {
+        var lat = 33.3 + (Math.random() - 0.5) * 2;
+        var lng = 44.3 + (Math.random() - 0.5) * 2;
+        clusterGroup.addLayer(L.marker([lat, lng]));
+      }
+    }
+  }
+});
+
+document.getElementById('btn-heatmap-toggle').addEventListener('click', function() {
+  if (heatmapLayer) {
+    map.removeLayer(heatmapLayer);
+    heatmapLayer = null;
+    this.classList.remove('active');
+  } else {
+    var points = [];
+    for (var i = 0; i < 200; i++) {
+      points.push([
+        33.3 + (Math.random() - 0.5) * 2,
+        44.3 + (Math.random() - 0.5) * 2,
+        Math.random()
+      ]);
+    }
+    heatmapLayer = L.heatLayer(points, {
+      radius: 25,
+      blur: 15,
+      maxZoom: 10
+    }).addTo(map);
+    this.classList.add('active');
+  }
+});
+
+/* ───────────────────────────────────────────────
+   7. محول الإحداثيات العسكري (MGRS / DMS)
+─────────────────────────────────────────────── */
+document.getElementById('tool-mgrs').addEventListener('click', function() {
+  toggleModal('modal-mgrs');
+});
+
+document.getElementById('mgrs-convert').addEventListener('click', function() {
+  var val = document.getElementById('mgrs-input').value.trim();
+  var parts = val.split(',').map(Number);
+
+  if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+    showToast('أدخل إحداثيات صحيحة (lat,lng)', true);
+    return;
+  }
+
+  var lat = parts[0];
+  var lng = parts[1];
+
+  try {
+    // التحويل إلى MGRS
+    var mgrsStr = mgrs.forward([lng, lat]);
+    document.getElementById('mgrs-out').textContent = mgrsStr;
+
+    // التحويل إلى DMS
+    var dmsLat = toDMS(lat, 'lat');
+    var dmsLng = toDMS(lng, 'lng');
+    document.getElementById('dms-out').textContent = dmsLat + ', ' + dmsLng;
+
+  } catch (e) {
+    showToast('خطأ في التحويل: ' + e.message, true);
+  }
+});
+
+/**
+ * تحويل الدرجات العشرية إلى نظام الدرجات والدقائق والثواني (DMS)
+ */
+function toDMS(deg, type) {
+  var dir = type === 'lat'
+    ? (deg >= 0 ? 'شمال' : 'جنوب')
+    : (deg >= 0 ? 'شرق' : 'غرب');
+
+  var abs = Math.abs(deg);
+  var d = Math.floor(abs);
+  var m = Math.floor((abs - d) * 60);
+  var s = ((abs - d - m / 60) * 3600).toFixed(2);
+
+  return d + '° ' + m + "' " + s + '" ' + dir;
+}
+
+/* ───────────────────────────────────────────────
+   8. مناطق زمن الوصول (Isochrones) - OpenRouteService
+─────────────────────────────────────────────── */
+document.getElementById('tool-isochrone').addEventListener('click', function() {
+  toggleModal('modal-isochrone');
+});
+
+document.getElementById('isochrone-apply').addEventListener('click', async function() {
+  var apiKey = document.getElementById('ors-key').value.trim();
+
+  if (!apiKey) {
+    showToast('أدخل مفتاح OpenRouteService API (مجاني من openrouteservice.org)', true);
+    return;
+  }
+
+  if (!mainMarker) {
+    showToast('ضع علامة على الخريطة أولاً', true);
+    return;
+  }
+
+  var time = parseInt(document.getElementById('isochrone-time').value);
+  var center = mainMarker.getLatLng();
+
+  try {
+    var res = await fetch('https://api.openrouteservice.org/v2/isochrones/foot-walking', {
+      method: 'POST',
+      headers: {
+        'Authorization': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        locations: [[center.lng, center.lat]],
+        range: [time * 60]  // الثواني
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error('HTTP ' + res.status + ' - تأكد من صحة المفتاح');
+    }
+
+    var data = await res.json();
+    isochroneLayer.clearLayers();
+
+    L.geoJSON(data, {
+      style: {
+        color: '#00d4ff',
+        fillColor: '#00d4ff',
+        fillOpacity: 0.1,
+        weight: 2
+      }
+    }).addTo(isochroneLayer);
+
+    showToast('✅ تم حساب منطقة زمن الوصول (' + time + ' دقيقة)');
+
+  } catch (e) {
+    showToast('فشل الاتصال بـ OpenRouteService: ' + e.message, true);
+  }
+});
+
+document.getElementById('isochrone-clear').addEventListener('click', function() {
+  isochroneLayer.clearLayers();
+  showToast('تم مسح مناطق زمن الوصول');
+});
+
+/* ───────────────────────────────────────────────
+   9. إنذار الخروج من المنطقة (Geofence Alerts)
+─────────────────────────────────────────────── */
+document.getElementById('tool-geofence').addEventListener('click', function() {
+  toggleModal('modal-geofence');
+});
+
+document.getElementById('geofence-check').addEventListener('click', function() {
+  var val = document.getElementById('geofence-coord').value.trim();
+  var parts = val.split(',').map(Number);
+
+  if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+    showToast('أدخل إحداثيات صحيحة', true);
+    return;
+  }
+
+  var pt = turf.point([parts[1], parts[0]]);
+  var inside = false;
+
+  zones.forEach(function(zone) {
+    var coords = zone.points.map(function(p) {
+      return [p.lng, p.lat];
+    });
+    coords.push(coords[0]);
+
+    if (turf.booleanPointInPolygon(pt, turf.polygon([coords]))) {
+      inside = true;
+    }
+  });
+
+  var resultEl = document.getElementById('geofence-result');
+  if (inside) {
+    resultEl.innerHTML = '<span style="color:#e63946;">🚨 النقطة داخل منطقة محظورة!</span>';
+  } else {
+    resultEl.innerHTML = '<span style="color:#56d364;">✅ النقطة خارج المناطق المحظورة</span>';
+  }
+});
+
+/**
+ * فحص إنذار تلقائي للنقطة (يُستدعى من المسار الزمني)
+ */
+function checkGeofenceForPoint(latlng) {
+  if (!zones.length) return;
+
+  var pt = turf.point([latlng.lng, latlng.lat]);
+  var inside = false;
+
+  zones.forEach(function(zone) {
+    var coords = zone.points.map(function(p) {
+      return [p.lng, p.lat];
+    });
+    coords.push(coords[0]);
+
+    if (turf.booleanPointInPolygon(pt, turf.polygon([coords]))) {
+      inside = true;
+    }
+  });
+
+  if (inside) {
+    showToast('🚨 النقطة داخل منطقة محظورة!', true);
+  }
+}
+
+/* ───────────────────────────────────────────────
+   10. طبقات OSINT (زلازل USGS)
+─────────────────────────────────────────────── */
+document.getElementById('btn-load-quakes').addEventListener('click', async function() {
+  try {
+    var res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    var data = await res.json();
+    quakeLayer.clearLayers();
+
+    L.geoJSON(data, {
+      pointToLayer: function(feature, latlng) {
+        return L.circleMarker(latlng, {
+          radius: feature.properties.mag * 2,
+          color: '#ff5722',
+          fillColor: '#ff5722',
+          fillOpacity: 0.4,
+          weight: 1.5
+        });
+      },
+      onEachFeature: function(feature, layer) {
+        if (feature.properties && feature.properties.title) {
+          layer.bindPopup(feature.properties.title);
+        }
+      }
+    }).addTo(quakeLayer);
+
+    showToast('🌍 تم تحميل ' + data.features.length + ' زلزال (آخر 24 ساعة)');
+
+  } catch (e) {
+    showToast('فشل تحميل بيانات الزلازل: ' + e.message, true);
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════════════
+   دوال مساعدة عامة
+═══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * فتح / إغلاق نافذة أداة
+ */
+function toggleModal(id) {
+  var el = document.getElementById(id);
+  var isOpen = el.classList.contains('open');
+
+  // إغلاق جميع النوافذ أولاً
+  document.querySelectorAll('.tool-modal').forEach(function(m) {
+    m.classList.remove('open');
+  });
+
+  // إذا لم تكن مفتوحة، افتحها
+  if (!isOpen) {
+    el.classList.add('open');
+  }
+}
+
+// زر الإغلاق لكل نافذة أداة
+document.querySelectorAll('.tool-modal-close').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.target.closest('.tool-modal').classList.remove('open');
+  });
+});
+
+/**
+ * نسخ نص للحافظة
+ */
 async function copyText(text, msg) {
   try {
     await navigator.clipboard.writeText(text);
-  } catch {
-    // Fallback للمتصفحات القديمة
-    const ta = Object.assign(document.createElement('textarea'), {
-      value: text,
-      style: 'position:fixed;opacity:0'
-    });
+  } catch (e) {
+    // احتياطي للمتصفحات القديمة
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
     document.body.appendChild(ta);
     ta.select();
     document.execCommand('copy');
@@ -1310,31 +2584,41 @@ async function copyText(text, msg) {
   showToast(msg || '✓ تم النسخ');
 }
 
-/* إشعار Toast */
-let toastTimer;
-function showToast(msg, isErr = false) {
-  const el = document.getElementById('toast');
+/**
+ * إشعار Toast
+ */
+var toastTimer;
+function showToast(msg, isErr) {
+  var el = document.getElementById('toast');
   el.textContent = msg;
-  el.className   = isErr ? 'err' : '';
+  el.className = isErr ? 'err' : '';
   el.style.display = 'block';
+
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3200);
+  toastTimer = setTimeout(function() {
+    el.style.display = 'none';
+  }, 3200);
 }
 
-/* تهريب HTML */
+/**
+ * تهريب HTML (لمنع XSS)
+ */
 function escHtml(str) {
-  return str.replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-/* تغيير حجم النافذة */
-window.addEventListener('resize', () => map && map.invalidateSize());
+// إعادة تحجيم الخريطة عند تغيير حجم النافذة
+window.addEventListener('resize', function() {
+  if (map) map.invalidateSize();
+});
 
-/* ════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════
    بدء التطبيق
-════════════════════════════════════════════ */
+═══════════════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', initMap);
 </script>
 </body>
