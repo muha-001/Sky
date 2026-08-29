@@ -16,7 +16,7 @@
     control.id = 'sky-gps-control';
     control.type = 'button';
     control.className = 'h-btn success';
-    control.textContent = '📍 GPS';
+    control.innerHTML = '<svg class="sky-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg><span>موقعي</span>';
     control.title = 'تشغيل أو إيقاف تتبع موقع الجهاز';
     control.setAttribute('aria-label', 'تشغيل أو إيقاف تتبع موقع الجهاز');
     control.addEventListener('click', toggle);
@@ -52,7 +52,8 @@
   function onError(error) {
     var message = error.code === 1 ? 'تم رفض إذن GPS' : error.code === 2 ? 'إشارة GPS غير متاحة' : 'انتهت مهلة GPS';
     var control = ensureControl();
-    control.textContent = '📍 GPS';
+    control.innerHTML = '<svg class="sky-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M12 7a5 5 0 1 0 0 10 5 5 0 0 0-5-5z"/></svg><span>موقعي</span>';
+
     control.classList.remove('active');
     toast(message + ' — يمكن أن يعمل GPS دون إنترنت إذا كان الجهاز يدعم GNSS', 'warn');
   }
@@ -74,7 +75,8 @@
     watchId = null;
     var control = ensureControl();
     control.classList.remove('active');
-    control.textContent = '📍 GPS';
+    control.innerHTML = '<svg class="sky-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M12 7a5 5 0 1 0 0 10 5 5 0 0 0-5-5z"/></svg><span>موقعي</span>';
+
     toast('تم إيقاف تتبع GPS');
   }
 
