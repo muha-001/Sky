@@ -129,7 +129,10 @@ document.getElementById('copy-coord-btn').addEventListener('click',function(){
 });
 document.getElementById('btn-clear').addEventListener('click',function(){
   if(mainMarker){map.removeLayer(mainMarker);mainMarker=null;}
+  zones.forEach(function(zone){if(zone.layer)map.removeLayer(zone.layer);stopEdit(zones.indexOf(zone));});
+  zones=[]; editIdx=null; modalIdx=null; zoneSeq=0; clearDraw(); stopDraw(); renderZones(); closeModal();
   document.getElementById('c-lat').textContent='-- ------'; document.getElementById('c-lng').textContent='-- ------'; document.getElementById('place-name').textContent='';
+  showToast('تم مسح العلامة والمناطق والرسم الحالي');
 });
 
 /* ════ SEARCH ════ */
@@ -1274,5 +1277,15 @@ function showToast(msg,type){
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 window.addEventListener('resize',function(){if(map)map.invalidateSize();});
 
+/* Compatibility bridge for inline card actions and external controllers. */
+window.openModal=openModal;
+window.toggleEdit=toggleEdit;
+window.doExport=doExport;
+window.deleteZone=deleteZone;
+window.showToast=showToast;
+window.placeMainMarker=placeMainMarker;
+window.setCoordPanel=setCoordPanel;
+window.map=null;
+
 /* ════ START ════ */
-document.addEventListener('DOMContentLoaded',initMap);
+document.addEventListener('DOMContentLoaded',function(){initMap();window.map=map;});

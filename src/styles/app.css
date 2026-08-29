@@ -26,6 +26,12 @@ html,body{height:100%;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:r
 .h-btn.active{background:rgba(0,212,255,.18);border-color:#00d4ff;color:#00d4ff}
 .h-btn.fire-active{background:rgba(248,81,73,.18);border-color:#f85149;color:#f85149}
 .h-btn.jam-active{background:rgba(156,39,176,.18);border-color:#9c27b0;color:#ce93d8}
+.sky-icon{width:15px;height:15px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.tool-icon .sky-icon{width:17px;height:17px}
+.tool-icon .tool-tip{font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+.z-actions{align-items:center}
+.z-btn{display:inline-flex;align-items:center;justify-content:center;min-height:25px}
+.z-btn:focus-visible,.h-btn:focus-visible,.tool-icon:focus-visible{outline:2px solid #58a6ff;outline-offset:2px}
 /* MAP */
 #map{position:fixed;inset:54px 0 0 0}
 #map.drawing-cursor,#map.drawing-cursor .leaflet-interactive{cursor:crosshair!important}
