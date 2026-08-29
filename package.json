@@ -1,0 +1,24 @@
+{
+  "name": "sky-geoint",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "node tests/coordinate-parser.test.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "leaflet": "1.9.4",
+    "leaflet.heat": "0.2.0",
+    "leaflet.markercluster": "1.5.3",
+    "mgrs": "1.0.0",
+    "tokml": "0.4.0",
+    "togeojson": "0.16.0",
+    "@turf/turf": "6.5.0"
+  },
+  "devDependencies": {
+    "vite": "6.1.0"
+  }
+}
