@@ -40,3 +40,9 @@ The service worker caches the application shell and the bundled gazetteer. Live 
 ## Attribution and operational notes
 
 Review each external provider’s terms, attribution requirements, rate limits, and licensing before deploying at scale. Do not store API keys in source control or expose sensitive operational data through a public deployment.
+
+## Safe geospatial operations
+
+The application includes a WGS-84 coordinate conversion module at `src/utils/geoConverter.js`. It supports decimal degrees, DMS, UTM, MGRS when the local MGRS library is available, GEOREF, and WGS-84 GeoJSON Point output. Each result is independently copyable from the coordinate conversion panel.
+
+The project intentionally focuses on geospatial awareness, field navigation, offline-capable mapping, data quality, and human-reviewed planning. It does not implement artillery fire-control, missile or weapon guidance, target interception, automated targeting, or covert tracking of individuals. Any future flight-planning features must remain non-weaponized and limited to general navigation, inspection, safety, and logistics use cases.

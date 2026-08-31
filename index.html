@@ -156,9 +156,11 @@
     <button class="tool-btn primary" id="mgrs-convert">تحويل</button>
     <button class="tool-btn success" id="mgrs-use-marker">استخدام موضع العلامة</button>
     <div style="margin-top:10px;font-size:11.5px;line-height:2.3">
-      <div><strong style="color:#8b949e">MGRS:</strong> <span id="mgrs-out" style="color:#56d364;font-family:monospace">--</span></div>
-      <div><strong style="color:#8b949e">DMS:</strong> <span id="dms-out" style="color:#56d364;font-family:monospace">--</span></div>
-      <div><strong style="color:#8b949e">UTM:</strong> <span id="utm-out" style="color:#56d364;font-family:monospace">--</span></div>
+      <div class="conversion-row"><strong style="color:#8b949e">MGRS:</strong> <span id="mgrs-out" style="color:#56d364;font-family:monospace">--</span><button class="tool-btn tiny" data-copy-format="mgrs" type="button">نسخ</button></div>
+      <div class="conversion-row"><strong style="color:#8b949e">DMS:</strong> <span id="dms-out" style="color:#56d364;font-family:monospace">--</span><button class="tool-btn tiny" data-copy-format="dms" type="button">نسخ</button></div>
+      <div class="conversion-row"><strong style="color:#8b949e">UTM:</strong> <span id="utm-out" style="color:#56d364;font-family:monospace">--</span><button class="tool-btn tiny" data-copy-format="utm" type="button">نسخ</button></div>
+      <div class="conversion-row"><strong style="color:#8b949e">GEOREF:</strong> <span id="georef-out" style="color:#56d364;font-family:monospace">--</span><button class="tool-btn tiny" data-copy-format="georef" type="button">نسخ</button></div>
+      <div class="conversion-row"><strong style="color:#8b949e">GeoJSON:</strong> <span id="geojson-out" style="color:#56d364;font-family:monospace;word-break:break-all">--</span><button class="tool-btn tiny" data-copy-format="geojson" type="button">نسخ</button></div>
     </div>
   </div>
 </div>

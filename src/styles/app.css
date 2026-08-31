@@ -158,3 +158,12 @@ html,body{height:100%;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:r
 #sky-gps-control.active{box-shadow:0 0 0 2px rgba(63,185,80,.3),0 0 12px rgba(63,185,80,.25)}
 @media (max-width:720px){.sky-connectivity-status{display:none}#sky-gps-control{font-size:10px;padding:4px 6px}}
 
+
+.conversion-row{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:6px;align-items:center;margin:4px 0}
+.conversion-row .tiny{padding:2px 6px;font-size:10px;white-space:nowrap}
+.conversion-row span{overflow-wrap:anywhere}
+@media (max-width:720px){.conversion-row{grid-template-columns:54px minmax(0,1fr) auto;font-size:10px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:0.01ms!important;animation-duration:0.01ms!important}}
+.tool-btn:active,.h-btn:active,.tool-icon:active{transform:scale(.97)}
+.tool-btn,.h-btn,.tool-icon{transition:transform .16s ease-out,background-color .16s ease-out,border-color .16s ease-out}
+.density-badge{display:inline-flex;align-items:center;gap:4px;border:1px solid #30363d;border-radius:999px;padding:2px 7px;color:#8b949e;font-size:10px}

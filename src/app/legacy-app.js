@@ -2,6 +2,8 @@
 /* ═══════════════════════════════════════════════════════════════════
    CONSTANTS & GLOBALS
 ═══════════════════════════════════════════════════════════════════ */
+import { convertCoordinate } from '../utils/geoConverter.js';
+
 var R_EARTH=6371000, K_REFRACT=0.13;
 var ZONE_COLORS=['#e63946','#00d4ff','#ffc947','#2ea043','#ff9800','#9c27b0','#00e5ff','#ff5722','#4fc3f7','#a3e635'];
 var CLOSE_DIST_M=22;
@@ -474,19 +476,15 @@ document.getElementById('mgrs-use-marker').addEventListener('click',function(){i
 document.getElementById('mgrs-convert').addEventListener('click',function(){
   var val=document.getElementById('mgrs-input').value.trim().replace(/،/g,',');
   var c=parseCoords(val);if(!c){showToast('أدخل إحداثيات صحيحة',true);return;}
-  try{document.getElementById('mgrs-out').textContent=mgrs.forward([c.lng,c.lat]);}catch(e){document.getElementById('mgrs-out').textContent='خارج نطاق MGRS';}
-  document.getElementById('dms-out').textContent=toDMS(c.lat,'lat')+', '+toDMS(c.lng,'lng');
-  // UTM calculation
-  var zone=Math.floor((c.lng+180)/6)+1;
-  var N=c.lat>=0?0:10000000;
-  var a=6378137,f=1/298.257223563,b=a*(1-f),e2=1-(b*b)/(a*a);
-  var lng0=(zone*6-183)*Math.PI/180,lat=c.lat*Math.PI/180,lng=c.lng*Math.PI/180;
-  var N1=a/Math.sqrt(1-e2*Math.sin(lat)*Math.sin(lat));
-  var T=Math.tan(lat)*Math.tan(lat),C=e2/(1-e2)*Math.cos(lat)*Math.cos(lat),A=Math.cos(lat)*(lng-lng0);
-  var M=a*((1-e2/4-3*e2*e2/64)*lat-(3*e2/8+3*e2*e2/32)*Math.sin(2*lat)+(15*e2*e2/256)*Math.sin(4*lat));
-  var x=500000+0.9996*N1*(A+(1-T+C)*A*A*A/6);
-  var y=N+0.9996*(M+N1*Math.tan(lat)*(A*A/2+(5-T+9*C+4*C*C)*A*A*A*A/24));
-  document.getElementById('utm-out').textContent=zone+(c.lat>=0?'N':'S')+' E:'+x.toFixed(0)+' N:'+y.toFixed(0);
+  try{
+    var result=convertCoordinate(c.lat,c.lng,typeof mgrs!=='undefined'?mgrs.forward:null);
+    document.getElementById('mgrs-out').textContent=result.mgrs;
+    document.getElementById('dms-out').textContent=result.dms;
+    document.getElementById('utm-out').textContent=result.utm;
+    var georef=document.getElementById('georef-out'); if(georef) georef.textContent=result.georef;
+    var geojson=document.getElementById('geojson-out'); if(geojson) geojson.textContent=result.geojson;
+    document.querySelectorAll('[data-copy-format]').forEach(function(btn){btn.dataset.copyValue=result[btn.dataset.copyFormat]||'';btn.onclick=function(){navigator.clipboard?.writeText(btn.dataset.copyValue||'');showToast('تم نسخ القيمة');};});
+  }catch(e){showToast('تعذر تحويل الإحداثيات: '+e.message,true);}
 });
 function toDMS(deg,type){var neg=deg<0,abs=Math.abs(deg),d=Math.floor(abs),m=Math.floor((abs-d)*60),s=((abs-d-m/60)*3600).toFixed(2);return d+'° '+m+"' "+s+'" '+(type==='lat'?(neg?'جنوب':'شمال'):(neg?'غرب':'شرق'));}
 
