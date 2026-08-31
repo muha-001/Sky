@@ -102,6 +102,7 @@
   <span class="ts-lbl">إحداثيات</span>
   <button class="tool-icon" id="tool-mgrsgrid"><span>🗺️</span><span class="tool-tip">شبكة MGRS على الخريطة</span></button>
   <button class="tool-icon" id="tool-pluscode"><span>🔤</span><span class="tool-tip">W3W & Plus Codes</span></button>
+  <button class="tool-icon" id="tool-uav-planner"><span>✈</span><span class="tool-tip">مخطط رحلة جوية آمن</span></button>
 </div>
 
 <!-- ════════════ MODALS ════════════ -->
@@ -162,6 +163,26 @@
       <div class="conversion-row"><strong style="color:#8b949e">GEOREF:</strong> <span id="georef-out" style="color:#56d364;font-family:monospace">--</span><button class="tool-btn tiny" data-copy-format="georef" type="button">نسخ</button></div>
       <div class="conversion-row"><strong style="color:#8b949e">GeoJSON:</strong> <span id="geojson-out" style="color:#56d364;font-family:monospace;word-break:break-all">--</span><button class="tool-btn tiny" data-copy-format="geojson" type="button">نسخ</button></div>
     </div>
+  </div>
+</div>
+
+<!-- Safe UAV flight planner -->
+<div id="modal-uav-planner" class="tool-modal">
+  <div class="tool-modal-header"><span>✈ مخطط رحلة جوية آمن</span><button class="tool-modal-close">✖</button></div>
+  <div class="tool-modal-body">
+    <p class="tool-note">للملاحة المدنية والتفتيش واللوجستيات فقط. الحساب إلى نقطة مسار محددة، وليس لاعتراض أهداف.</p>
+    <div class="tool-input-group"><label>نقطة الإقلاع / المرجع (lat, lng)</label><input id="uav-takeoff" placeholder="33.3152, 44.3661"/></div>
+    <div class="tool-input-group"><label>نقطة المسار (lat, lng)</label><input id="uav-waypoint" placeholder="33.3200, 44.3700"/></div>
+    <div class="uav-input-grid">
+      <div class="tool-input-group"><label>السرعة الجوية (كم/س)</label><input id="uav-speed" type="number" value="60" min="1" step="1"/></div>
+      <div class="tool-input-group"><label>التحمل الكلي (دقيقة)</label><input id="uav-endurance" type="number" value="30" min="1" step="1"/></div>
+      <div class="tool-input-group"><label>احتياطي العودة (%)</label><input id="uav-reserve" type="number" value="25" min="0" max="89" step="1"/></div>
+      <div class="tool-input-group"><label>سرعة الرياح (كم/س)</label><input id="uav-wind-speed" type="number" value="0" min="0" step="1"/></div>
+      <div class="tool-input-group"><label>اتجاه الرياح (°)</label><input id="uav-wind-direction" type="number" value="0" min="0" max="360" step="1"/></div>
+    </div>
+    <div class="uav-actions"><button class="tool-btn success" id="uav-use-marker">استخدام العلامة كنقطة إقلاع</button><button class="tool-btn" id="uav-use-center">استخدام مركز الخريطة</button></div>
+    <button class="tool-btn primary" id="uav-calculate">حساب الرحلة</button>
+    <div id="uav-output" class="uav-output">أدخل البيانات ثم اضغط «حساب الرحلة».</div>
   </div>
 </div>
 

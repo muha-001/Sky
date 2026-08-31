@@ -3,6 +3,7 @@
    CONSTANTS & GLOBALS
 ═══════════════════════════════════════════════════════════════════ */
 import { convertCoordinate } from '../utils/geoConverter.js';
+import { initUavPlanner } from '../components/tactical/uav-planner.js';
 
 var R_EARTH=6371000, K_REFRACT=0.13;
 var ZONE_COLORS=['#e63946','#00d4ff','#ffc947','#2ea043','#ff9800','#9c27b0','#00e5ff','#ff5722','#4fc3f7','#a3e635'];
@@ -1283,7 +1284,8 @@ window.deleteZone=deleteZone;
 window.showToast=showToast;
 window.placeMainMarker=placeMainMarker;
 window.setCoordPanel=setCoordPanel;
+window.getMainCoordinate=function(){return mainMarker?mainMarker.getLatLng():null;};
 window.map=null;
 
 /* ════ START ════ */
-document.addEventListener('DOMContentLoaded',function(){initMap();window.map=map;});
+document.addEventListener('DOMContentLoaded',function(){initMap();window.map=map;initUavPlanner();});
