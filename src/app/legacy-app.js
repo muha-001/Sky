@@ -10,7 +10,8 @@ var ZONE_COLORS=['#e63946','#00d4ff','#ffc947','#2ea043','#ff9800','#9c27b0','#0
 var CLOSE_DIST_M=22;
 
 var map, streetTile, satelliteTile, labelsLayer, isSatellite=false;
-var mainMarker=null, drawMode=false, drawPoints=[], drawLine=null, drawDots=[];
+var mainMarker=null, drawMode=false, drawPoints=[], drawLine=null, drawDots=[], routePickTarget=false;
+var mapBearing=0;
 var zones=[], zoneSeq=0, modalIdx=null, editIdx=null;
 var timelineRecording=false, timelinePoints=[], timelineMarker=null, timelineInterval=null, timelinePolyline=null;
 var losPoints=[], losMarkers=[], losLine=null;
@@ -68,6 +69,7 @@ function initMap(){
   powerLayer=L.featureGroup().addTo(map); mgrsGridLayer=L.featureGroup().addTo(map);
 
   map.on('click',function(e){
+    if(routePickTarget){document.getElementById('sr-to').value=e.latlng.lat.toFixed(7)+', '+e.latlng.lng.toFixed(7);routePickTarget=false;document.getElementById('sr-progress').textContent='تم تحديد نقطة الوصول من الخريطة';showToast('تم تحديد نقطة الوصول');return;}
     if(drawMode) addDrawPoint(e);
     else if(document.getElementById('modal-los').classList.contains('open')) addLOSPoint(e);
     else if(timelineRecording) addTimelinePoint(e);
@@ -75,7 +77,8 @@ function initMap(){
   });
   map.on('mousemove',function(e){ document.getElementById('cursor-info').textContent=e.latlng.lat.toFixed(7)+',  '+e.latlng.lng.toFixed(7); });
   map.on('moveend',function(){ if(mgrsGridActive) drawMGRSGrid(); });
-  map.on('zoomend',function(){ if(mgrsGridActive) drawMGRSGrid(); });
+  map.on('zoomend',function(){ if(mgrsGridActive) drawMGRSGrid(); refreshMapBearing(); });
+  map.on('moveend',refreshMapBearing);
 
   // Set today for solar date
   var d=new Date(); document.getElementById('solar-date').value=d.toISOString().split('T')[0];
@@ -862,6 +865,7 @@ document.getElementById('weapons-clear').addEventListener('click',function(){wea
 /* ════ SAFE ROUTE ════ */
 document.getElementById('tool-saferoute').addEventListener('click',function(){toggleModal('modal-saferoute');});
 document.getElementById('sr-from-marker').addEventListener('click',function(){if(!mainMarker){showToast('ضع علامة أولاً',true);return;}var ll=mainMarker.getLatLng();document.getElementById('sr-from').value=ll.lat.toFixed(6)+', '+ll.lng.toFixed(6);});
+document.getElementById('sr-pick-target').addEventListener('click',function(){routePickTarget=true;document.getElementById('sr-progress').textContent='انقر على الخريطة لتحديد نقطة الوصول';showToast('اختر نقطة الوصول بالنقر على الخريطة');});
 document.getElementById('sr-apply').addEventListener('click',async function(){
   var apiKey=document.getElementById('ors-key').value.trim();if(!apiKey){showToast('أدخل مفتاح ORS في نافذة Isochrones',true);return;}
   var fromC=parseCoords(document.getElementById('sr-from').value.trim().replace(/،/g,','));
@@ -871,7 +875,8 @@ document.getElementById('sr-apply').addEventListener('click',async function(){
   document.getElementById('sr-progress').textContent='⏳ حساب المسار…';
   safeRouteLayer.clearLayers();
   try{
-    var res=await fetchTimeout('https://api.openrouteservice.org/v2/directions/'+mode,{method:'POST',headers:{'Authorization':apiKey,'Content-Type':'application/json'},body:JSON.stringify({coordinates:[[fromC.lng,fromC.lat],[toC.lng,toC.lat]]})},15000);
+    var preference=document.getElementById('sr-preference').value||'fastest';
+    var res=await fetchTimeout('https://api.openrouteservice.org/v2/directions/'+mode+'?preference='+encodeURIComponent(preference),{method:'POST',headers:{'Authorization':apiKey,'Content-Type':'application/json'},body:JSON.stringify({coordinates:[[fromC.lng,fromC.lat],[toC.lng,toC.lat]]})},15000);
     document.getElementById('sr-progress').textContent='';btn.disabled=false;
     if(!res.ok){var t=await res.text();throw new Error('HTTP '+res.status+': '+t.slice(0,60));}
     var data=await res.json();
@@ -904,7 +909,21 @@ document.getElementById('sr-apply').addEventListener('click',async function(){
     showToast(warnings.length?'⚠️ تحذير: يخترق مناطق محظورة':'✅ مسار آمن — '+distKm+' كم');
   }catch(e){document.getElementById('sr-progress').textContent='';btn.disabled=false;document.getElementById('sr-result').textContent='⚠ '+e.message;showToast('فشل: '+e.message,true);}
 });
-document.getElementById('sr-clear').addEventListener('click',function(){safeRouteLayer.clearLayers();document.getElementById('sr-result').textContent='';showToast('تم مسح');});
+document.getElementById('sr-clear').addEventListener('click',function(){safeRouteLayer.clearLayers();routePickTarget=false;document.getElementById('sr-result').textContent='';document.getElementById('sr-progress').textContent='';showToast('تم مسح');});
+
+/* ════ MAP ROTATION ════ */
+function applyMapBearing(deg){
+  mapBearing=Math.max(-180,Math.min(180,Number(deg)||0));
+  var pane=document.querySelector('.leaflet-map-pane');
+  if(pane){var base=pane.style.transform.replace(/\\srotate\\([^)]*\\)/g,'').trim();pane.style.transform=(base||'translate3d(0px, 0px, 0px)')+' rotate('+mapBearing+'deg)';}
+  var slider=document.getElementById('map-bearing');if(slider)slider.value=mapBearing;
+  var reset=document.getElementById('map-rotate-reset');if(reset)reset.textContent=mapBearing===0?'N':Math.round(mapBearing)+'°';
+}
+function refreshMapBearing(){if(mapBearing!==0)applyMapBearing(mapBearing);}
+document.getElementById('map-rotate-left').addEventListener('click',function(){applyMapBearing(mapBearing-15);});
+document.getElementById('map-rotate-right').addEventListener('click',function(){applyMapBearing(mapBearing+15);});
+document.getElementById('map-rotate-reset').addEventListener('click',function(){applyMapBearing(0);});
+document.getElementById('map-bearing').addEventListener('input',function(){applyMapBearing(this.value);});
 function decodePolyline(encoded){var points=[],index=0,lat=0,lng=0;while(index<encoded.length){var b,shift=0,result=0;do{b=encoded.charCodeAt(index++)-63;result|=(b&0x1f)<<shift;shift+=5;}while(b>=32);lat+=(result&1)?~(result>>1):(result>>1);shift=0;result=0;do{b=encoded.charCodeAt(index++)-63;result|=(b&0x1f)<<shift;shift+=5;}while(b>=32);lng+=(result&1)?~(result>>1):(result>>1);points.push([lat/1e5,lng/1e5]);}return points;}
 
 /* ════ OPTIMAL OP PLACEMENT ════ */

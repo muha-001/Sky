@@ -166,6 +166,14 @@
   </div>
 </div>
 
+<!-- Map rotation controls -->
+<div id="map-rotation-control" class="map-rotation-control" aria-label="تدوير الخريطة">
+  <button type="button" id="map-rotate-left" aria-label="تدوير يساراً">↺</button>
+  <button type="button" id="map-rotate-reset" aria-label="إعادة اتجاه الشمال">N</button>
+  <button type="button" id="map-rotate-right" aria-label="تدوير يميناً">↻</button>
+  <input id="map-bearing" type="range" min="-180" max="180" value="0" step="1" aria-label="زاوية الخريطة" />
+</div>
+
 <!-- Safe UAV flight planner -->
 <div id="modal-uav-planner" class="tool-modal">
   <div class="tool-modal-header"><span>✈ مخطط رحلة جوية آمن</span><button class="tool-modal-close">✖</button></div>
@@ -397,12 +405,13 @@
     <p style="font-size:10.5px;color:#8b949e;margin-bottom:7px">يحسب أفضل مسار بين علامتين مع تحذير عند اختراق المناطق المحظورة</p>
     <div class="tool-input-group"><label>إحداثيات نقطة البداية (lat, lng)</label><input id="sr-from" placeholder="33.3152, 44.3661"/></div>
     <div class="tool-input-group"><label>إحداثيات نقطة النهاية (lat, lng)</label><input id="sr-to" placeholder="33.5, 44.5"/></div>
-    <div class="tool-input-group"><label>وسيلة التنقل</label>
-      <select id="sr-mode"><option value="foot-walking">🚶 مشياً</option><option value="driving-car">🚗 سيارة</option></select>
+    <div class="route-input-grid">
+      <div class="tool-input-group"><label>وسيلة التنقل</label><select id="sr-mode"><option value="foot-walking">مشياً</option><option value="driving-car">سيارة</option></select></div>
+      <div class="tool-input-group"><label>تفضيل المسار</label><select id="sr-preference"><option value="fastest">الأسرع</option><option value="shortest">الأقصر</option></select></div>
     </div>
     <p style="font-size:9.5px;color:#484f58;margin-bottom:5px">💡 استخدم نفس مفتاح ORS من نافذة Isochrones</p>
-    <button class="tool-btn primary" id="sr-from-marker">من موضع العلامة (البداية)</button>
-    <button class="tool-btn success" id="sr-apply">🛡️ احسب المسار</button>
+    <div class="route-actions"><button class="tool-btn primary" id="sr-from-marker">من العلامة (البداية)</button><button class="tool-btn" id="sr-pick-target">تحديد النهاية بالنقر</button></div>
+    <button class="tool-btn success" id="sr-apply">احسب المسار</button>
     <button class="tool-btn warning" id="sr-clear">مسح</button>
     <div class="prog-line" id="sr-progress"></div>
     <div class="res-box" id="sr-result" style="min-height:20px"></div>

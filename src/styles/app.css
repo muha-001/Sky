@@ -180,3 +180,13 @@ html,body{height:100%;font-family:'Segoe UI',Tahoma,Arial,sans-serif;direction:r
 .uav-feasibility.ok{color:#56d364;background:rgba(46,160,67,.12)}
 .uav-feasibility.danger{color:#f85149;background:rgba(248,81,73,.12)}
 @media (max-width:520px){.uav-input-grid{grid-template-columns:1fr}}
+
+.sky-icon{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.tool-icon[data-icon-category="surveillance"]{color:#39c5f2}.tool-icon[data-icon-category="mobility"]{color:#f59e0b}.tool-icon[data-icon-category="analysis"]{color:#a855f7}.tool-icon[data-icon-category="warning"]{color:#ef4444}.tool-icon[data-icon-category="data"]{color:#7a9e3a}
+.tool-icon:focus-visible,.tool-btn:focus-visible,#map-rotation-control button:focus-visible,#map-bearing:focus-visible{outline:2px solid #58a6ff;outline-offset:2px}
+.map-rotation-control{position:absolute;z-index:800;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:4px;padding:4px 6px;background:rgba(13,17,23,.88);border:1px solid #30363d;border-radius:8px;box-shadow:0 5px 18px rgba(0,0,0,.28);direction:ltr}
+.map-rotation-control button{width:28px;height:28px;border:1px solid #484f58;border-radius:5px;background:#161b22;color:#c9d1d9;cursor:pointer;font-weight:700;touch-action:manipulation}
+.map-rotation-control button:hover{background:#21262d;color:#58a6ff}.map-rotation-control input{width:90px;accent-color:#39c5f2;touch-action:manipulation}
+.route-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.route-actions{display:flex;gap:6px;margin:7px 0}.route-actions .tool-btn{flex:1}
+@media (max-width:600px){.map-rotation-control{top:8px}.map-rotation-control input{width:72px}.route-input-grid{grid-template-columns:1fr}.route-actions{flex-direction:column}.sky-icon{width:19px;height:19px}}
+@media (pointer:coarse){.map-rotation-control button{width:36px;height:36px}.map-rotation-control input{height:32px}}
